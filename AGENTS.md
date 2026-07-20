@@ -7,17 +7,20 @@
 - 如果有不明晰的问题，请询问用户而不是自行决断。
 
 ## Environment and toolchain
-- Java 21, Maven, Spring Boot 4, Redis, Spring Cloud, MyBatis, MySQL 8
+- Java 21, Maven, Spring Boot 3.5, Spring Cloud, Spring Cloud Alibaba Nacos, RabbitMQ, Redis, MyBatis, MySQL 8
 - 文件读取、写入、更改相应操作使用tools工具
 
 ## 项目目标与架构
 
 - 本项目是单组织多部门的智能会议室与工位预约后端。
 - `plan`已写入`docs/superpowers/plans`，请**务必**看过相应plan后再进行相应功能的添加。
-- 采用模块化单体。领域模块为 `identity`、`organization`、`resource`、`reservation`、`approval`、`attendance`、`notification`、`analytics`。
-- 包路径按领域模块组织；每个模块内再按 `domain`、`application`、`persistence`、`infrastructure`、`web` 划分职责。不得仅按全局 Controller/Service/Mapper 分层堆放业务代码。
-- MySQL 是业务事实来源，MyBatis 是唯一数据库访问层；Redis 仅用于 Token、缓存、幂等和短期分布式锁。
-- 首期不引入 RabbitMQ、服务注册中心、API 网关、多租户或独立微服务。异步通知通过 MySQL Outbox 和定时任务实现，领域代码只依赖 `DomainEventPublisher`。
+- 采用 Maven 多模块微服务。服务模块为 `gateway`、`identity-service`、`resource-service`、`reservation-service`、`notification-service` 和共享契约模块 `claimpaws-common`。
+- 每个业务服务内按 `domain`、`application`、`persistence`、`infrastructure`、`web` 划分职责。不得仅按全局 Controller/Service/Mapper 分层堆放业务代码。
+- 每个业务服务拥有独立 MySQL database/schema、独立 Flyway 迁移目录和独立 Nacos Data ID。严禁跨服务数据库访问、跨服务 Mapper 调用和分布式事务。
+- Nacos 同时提供服务发现和配置中心，Namespace 使用 `dev`、`test`、`prod` 隔离。Gateway 不保存业务数据，只负责路由、请求 ID、跨域、限流和 JWT 透传。
+- RabbitMQ 是跨服务事件总线；使用 Topic Exchange `claimpaws.domain.events`。生产方通过本地 Outbox 发布，消费方按 `eventId` 幂等处理、有限重试并进入死信队列。
+- MySQL 是服务内业务事实来源，MyBatis 是唯一数据库访问层；Redis 仅用于 Token、缓存、幂等和短期分布式锁。
+- 严禁使用MyBatis Plus进行生成。
 
 ## 业务边界
 
@@ -39,7 +42,7 @@ CONFIRMED -> NO_SHOW
 
 ## 数据与迁移
 
-- 所有 schema 修改必须新增 `src/main/resources/db/migration/V{版本}__{说明}.sql`，不得修改已发布迁移，也不得依赖 Hibernate 自动建表。
+- 所有 schema 修改必须在所属服务新增 `{service}/src/main/resources/db/migration/V{版本}__{说明}.sql`，不得修改已发布迁移，也不得依赖 Hibernate 自动建表。
 - 业务表必须包含 `id`、创建/更新审计字段与 `deleted` 逻辑删除字段；预约状态变更额外写入不可变审计日志。
 - Mapper SQL 必须参数化，禁止字符串拼接 SQL。查询必须显式过滤逻辑删除数据，并按访问路径建立索引。
 - 分页接口使用确定的排序字段和边界限制；禁止无条件读取大表。
@@ -51,18 +54,25 @@ CONFIRMED -> NO_SHOW
 - 投递请求必须包含唯一事件 ID、事件类型、UTC 时间戳和 HMAC-SHA256 签名；消费端幂等由事件 ID 支持。
 - 投递失败按指数退避重试，达到最大次数后标记失败；绝不回滚已提交的预约业务。
 
+## 服务通信
+
+- 客户端仅访问 `gateway`；业务服务仍自行校验 JWT、用户身份和权限，禁止仅信任网关透传的权限结论。
+- `reservation-service` 仅通过 OpenFeign 读取 `resource-service` 的资源与策略快照，资源服务不可用时返回 `RESOURCE_SERVICE_UNAVAILABLE`，不得创建预约。
+- 跨服务状态变化使用 `DomainEvent`，事件必须包含 `eventId`、`eventType`、`occurredAt`、`aggregateId`、`schemaVersion` 和载荷。禁止同步调用通知服务影响预约主事务。
+- `identity-service` 是用户、角色和部门的唯一写入方；其他服务只能保存由事件构建的只读投影。
+
 ## 测试与验证
 
 - 新功能和缺陷修复遵循 Red-Green-Refactor：先写一个失败测试并运行确认失败，再写最小实现，最后运行通过测试。
-- 单元测试覆盖状态机、策略、权限、签名与纯业务规则；MySQL/Redis 交互使用 Testcontainers 集成测试；HTTP 契约使用 Spring MVC 测试。
+- 单元测试覆盖状态机、策略、权限、签名与纯业务规则；MySQL、Redis、RabbitMQ 使用 Testcontainers 集成测试；HTTP 契约使用 Spring MVC 或 Gateway 测试。
 - 修改 Java、SQL 或 Maven 配置后至少运行关联测试；交付前运行 `./mvnw verify`。
 - 常用命令：
 
 ```bash
 ./mvnw test
-./mvnw test -Dtest=ReservationServiceIT
+./mvnw -pl reservation-service test -Dtest=ReservationServiceIT
+./mvnw -pl gateway spring-boot:run
 ./mvnw verify
-./mvnw spring-boot:run
 ```
 
 ## 代码规范
