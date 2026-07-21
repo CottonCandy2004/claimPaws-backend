@@ -4,10 +4,11 @@ spring:
       on-profile: docker
   cloud:
     nacos:
+      server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
-  config:
-    import: optional:nacos:${NACOS_SERVER_ADDR:nacos:8848}
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
   datasource:
     url: jdbc:mysql://mysql:3306/claimpaws_resource?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
     username: ${MYSQL_USER:claimpaws}
