@@ -1,3 +1,7 @@
+networks:
+  claimpaws-net:
+    driver: bridge
+
 services:
   mysql:
     image: mysql:8
@@ -11,6 +15,8 @@ services:
     volumes:
       - ./docker/mysql/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
       - mysql-data:/var/lib/mysql
+    networks:
+      - claimpaws-net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-plocal-dev-only"]
       interval: 10s
@@ -21,6 +27,8 @@ services:
     image: redis:7-alpine
     ports:
       - "127.0.0.1:6379:6379"
+    networks:
+      - claimpaws-net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -35,6 +43,8 @@ services:
     ports:
       - "127.0.0.1:5672:5672"
       - "127.0.0.1:15672:15672"
+    networks:
+      - claimpaws-net
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -50,11 +60,125 @@ services:
     ports:
       - "127.0.0.1:8848:8848"
       - "127.0.0.1:9848:9848"
+    networks:
+      - claimpaws-net
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8848/nacos/actuator/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 20
+
+  identity-service:
+    build:
+      context: ./identity-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      NACOS_SERVER_ADDR: ${NACOS_SERVER_ADDR:-nacos:8848}
+      MYSQL_USER: ${MYSQL_USER:-claimpaws}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-me-32-bytes}
+    ports:
+      - "127.0.0.1:8081:8081"
+    networks:
+      - claimpaws-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+
+  resource-service:
+    build:
+      context: ./resource-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      NACOS_SERVER_ADDR: ${NACOS_SERVER_ADDR:-nacos:8848}
+      MYSQL_USER: ${MYSQL_USER:-claimpaws}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+    ports:
+      - "127.0.0.1:8082:8082"
+    networks:
+      - claimpaws-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+
+  reservation-service:
+    build:
+      context: ./reservation-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      NACOS_SERVER_ADDR: ${NACOS_SERVER_ADDR:-nacos:8848}
+      MYSQL_USER: ${MYSQL_USER:-claimpaws}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-claimpaws}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-local-dev-only}
+    ports:
+      - "127.0.0.1:8083:8083"
+    networks:
+      - claimpaws-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: ./notification-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      NACOS_SERVER_ADDR: ${NACOS_SERVER_ADDR:-nacos:8848}
+      MYSQL_USER: ${MYSQL_USER:-claimpaws}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-claimpaws}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-local-dev-only}
+      WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY:-MDEyMzQ1Njc4OWFiY2RlZg==}
+    ports:
+      - "127.0.0.1:8084:8084"
+    networks:
+      - claimpaws-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: ./gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      NACOS_SERVER_ADDR: ${NACOS_SERVER_ADDR:-nacos:8848}
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks:
+      - claimpaws-net
+    depends_on:
+      nacos:
+        condition: service_healthy
+      identity-service:
+        condition: service_started
+      resource-service:
+        condition: service_started
+      reservation-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
 
 volumes:
   mysql-data:
