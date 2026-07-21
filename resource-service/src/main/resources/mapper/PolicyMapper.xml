@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.czu.claimpaws.resource.persistence.PolicyMapper">
+
+    <resultMap id="policyResultMap" type="cn.czu.claimpaws.resource.domain.ReservationPolicy">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="resource_id" javaType="java.lang.Long"/>
+            <arg column="slot_minutes" javaType="java.lang.Integer"/>
+            <arg column="advance_days" javaType="java.lang.Integer"/>
+            <arg column="min_duration_minutes" javaType="java.lang.Integer"/>
+            <arg column="max_duration_minutes" javaType="java.lang.Integer"/>
+            <arg column="cancel_deadline_minutes" javaType="java.lang.Integer"/>
+            <arg column="check_in_window_minutes" javaType="java.lang.Integer"/>
+            <arg column="requires_approval" javaType="java.lang.Boolean"/>
+            <arg column="approval_level" javaType="java.lang.Integer"/>
+            <arg column="active" javaType="java.lang.Boolean"/>
+            <arg column="created_at" javaType="java.time.LocalDateTime"/>
+            <arg column="updated_at" javaType="java.time.LocalDateTime"/>
+            <arg column="deleted" javaType="java.lang.Boolean"/>
+        </constructor>
+    </resultMap>
+
+    <select id="requireActiveByResourceId" resultMap="policyResultMap">
+        SELECT * FROM reservation_policies
+        WHERE resource_id = #{resourceId} AND active = TRUE AND deleted = FALSE
+        LIMIT 1
+    </select>
+
+</mapper>
