@@ -3,6 +3,7 @@ package cn.czu.claimpaws.notification;
 import cn.czu.claimpaws.common.event.DomainEvent;
 import cn.czu.claimpaws.notification.messaging.ReservationEventListener;
 import cn.czu.claimpaws.notification.persistence.DeliveryMapper;
+import cn.czu.claimpaws.notification.application.WebhookEndpointService;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -28,12 +30,17 @@ class ReservationEventListenerIT {
     static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8")
             .withDatabaseName("claimpaws_notification");
 
+    @Container
+    static RabbitMQContainer rabbitMq = new RabbitMQContainer("rabbitmq:3.13-management");
+
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
         registry.add("spring.datasource.username", mysql::getUsername);
         registry.add("spring.datasource.password", mysql::getPassword);
         registry.add("spring.datasource.driver-class-name", mysql::getDriverClassName);
+        registry.add("spring.rabbitmq.host", rabbitMq::getHost);
+        registry.add("spring.rabbitmq.port", rabbitMq::getAmqpPort);
     }
 
     @Autowired
@@ -42,8 +49,12 @@ class ReservationEventListenerIT {
     @Autowired
     private DeliveryMapper deliveryMapper;
 
+    @Autowired
+    private WebhookEndpointService webhookEndpointService;
+
     @Test
     void ignoresDuplicateEventId() {
+        webhookEndpointService.add("https://example.com/events", "test-secret");
         var event = new DomainEvent(
                 UUID.randomUUID(),
                 "reservation.created",

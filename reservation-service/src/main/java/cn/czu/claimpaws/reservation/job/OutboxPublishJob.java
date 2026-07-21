@@ -1,17 +1,15 @@
 package cn.czu.claimpaws.reservation.job;
 
 import cn.czu.claimpaws.reservation.domain.OutboxMessage;
+import cn.czu.claimpaws.reservation.infrastructure.OutboxPublisher;
 import cn.czu.claimpaws.reservation.persistence.OutboxMapper;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 public class OutboxPublishJob {
@@ -19,33 +17,26 @@ public class OutboxPublishJob {
     private static final Logger log = LoggerFactory.getLogger(OutboxPublishJob.class);
 
     private final OutboxMapper outboxMapper;
-    private final RabbitTemplate rabbitTemplate;
-    private final ObjectMapper objectMapper;
+    private final OutboxPublisher outboxPublisher;
 
-    public OutboxPublishJob(OutboxMapper outboxMapper, RabbitTemplate rabbitTemplate, ObjectMapper objectMapper) {
+    public OutboxPublishJob(OutboxMapper outboxMapper, OutboxPublisher outboxPublisher) {
         this.outboxMapper = outboxMapper;
-        this.rabbitTemplate = rabbitTemplate;
-        this.objectMapper = objectMapper;
+        this.outboxPublisher = outboxPublisher;
     }
 
     @Scheduled(fixedDelay = 5000)
     public void publishPending() {
-        List<OutboxMessage> messageList = outboxMapper.findPending();
-        for (OutboxMessage message : messageList) {
+        String owner = UUID.randomUUID().toString();
+        for (OutboxMessage message : outboxMapper.findClaimCandidates()) {
+            if (outboxMapper.claim(message.id(), owner, LocalDateTime.now().plusSeconds(30)) != 1) {
+                continue;
+            }
             try {
-                ObjectNode eventJson = objectMapper.createObjectNode();
-                eventJson.put("eventId", message.eventId());
-                eventJson.put("eventType", message.eventType());
-                eventJson.put("occurredAt", message.occurredAt().toString());
-                eventJson.put("aggregateId", message.aggregateId());
-                eventJson.put("schemaVersion", message.schemaVersion());
-                JsonNode payloadNode = objectMapper.readTree(message.payload());
-                eventJson.set("payload", payloadNode);
-                String json = objectMapper.writeValueAsString(eventJson);
-                rabbitTemplate.convertAndSend("claimpaws.domain.events", message.eventType(), json);
-                outboxMapper.updateStatus(message.id(), "PUBLISHED");
+                outboxPublisher.publish(message);
+                outboxMapper.updateStatus(message.id(), owner, "PUBLISHED");
                 log.debug("Published outbox message {}", message.eventId());
             } catch (Exception e) {
+                outboxMapper.releaseClaim(message.id(), owner);
                 log.error("Failed to publish outbox message {}", message.eventId(), e);
             }
         }

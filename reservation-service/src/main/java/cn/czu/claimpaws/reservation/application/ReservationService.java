@@ -12,6 +12,7 @@ import cn.czu.claimpaws.reservation.persistence.OutboxMapper;
 import cn.czu.claimpaws.reservation.persistence.ReservationMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DuplicateKeyException;
 
 @Service
 public class ReservationService {
@@ -37,16 +38,20 @@ public class ReservationService {
     @Transactional
     public ReservationView create(long userId, String key, CreateReservationCommand command) {
         ReservationSnapshotDTO snapshot = resourceClient.getSnapshot(command.resourceId());
-        return idempotency.execute(userId, key, () -> reservationLock.withLock(command, () -> {
+        return idempotency.execute(userId, key, () -> reservationLock.withLock(command, snapshot.policy().slotMinutes(), () -> {
             validator.validate(command, snapshot);
             if (reservationMapper.existsOverlap(command.resourceId(), command.startAt(), command.endAt())) {
                 throw new BusinessException(ErrorCode.RESERVATION_TIME_CONFLICT);
             }
             Reservation reservation = Reservation.create(userId, command, snapshot);
             reservationMapper.insert(reservation);
-            long id = reservationMapper.lastInsertId();
+            try {
+                reservationMapper.insertOccupiedSlots(reservation.id(), command.resourceId(), command.startAt(), command.endAt(), snapshot.policy().slotMinutes());
+            } catch (DuplicateKeyException duplicateKeyException) {
+                throw new BusinessException(ErrorCode.RESERVATION_TIME_CONFLICT);
+            }
             outboxMapper.insert(OutboxMessage.created(DomainEvents.reservationCreated(reservation)));
-            return ReservationView.from(reservation, id);
+            return ReservationView.from(reservation, reservation.id());
         }));
     }
 }

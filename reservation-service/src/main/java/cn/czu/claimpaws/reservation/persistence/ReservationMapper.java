@@ -14,7 +14,9 @@ public interface ReservationMapper {
 
     void insert(Reservation reservation);
 
-    long lastInsertId();
+    void insertOccupiedSlots(@Param("reservationId") long reservationId, @Param("resourceId") long resourceId,
+                             @Param("startAt") Instant startAt, @Param("endAt") Instant endAt,
+                             @Param("slotMinutes") int slotMinutes);
 
     long count();
 

@@ -8,7 +8,47 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO notification_deliveries (event_id, event_type, payload, signature, status, retry_count, deleted)
-        VALUES (#{eventId}, #{eventType}, #{payload}, #{signature}, #{status}, #{retryCount}, FALSE)
+        INSERT INTO notification_deliveries (webhook_config_id, event_id, event_type, payload, endpoint_url, signature,
+                                            status, retry_count, next_attempt_at, deleted)
+        VALUES (#{webhookConfigId}, #{eventId}, #{eventType}, #{payload}, #{endpointUrl}, '', #{status}, #{retryCount},
+                #{nextAttemptAt}, FALSE)
     </insert>
+
+    <select id="findDue" resultType="cn.czu.claimpaws.notification.domain.WebhookDeliveryTask">
+        SELECT d.id, d.event_id, d.event_type, d.payload, d.endpoint_url, c.encrypted_secret,
+               d.retry_count, d.next_attempt_at
+        FROM notification_deliveries d
+        JOIN webhook_configs c ON c.id = d.webhook_config_id AND c.deleted = FALSE AND c.enabled = TRUE
+        WHERE d.deleted = FALSE AND d.status IN ('PENDING', 'RETRY')
+          AND d.next_attempt_at &lt;= #{now}
+        ORDER BY d.next_attempt_at, d.id LIMIT #{limit} FOR UPDATE SKIP LOCKED
+    </select>
+
+    <update id="markProcessing">
+        UPDATE notification_deliveries SET status = 'PROCESSING', claimed_at = UTC_TIMESTAMP()
+        WHERE id = #{id} AND status IN ('PENDING', 'RETRY') AND deleted = FALSE
+    </update>
+
+    <update id="recoverExpiredClaims">
+        UPDATE notification_deliveries
+        SET status = 'RETRY', claimed_at = NULL, next_attempt_at = UTC_TIMESTAMP(),
+            failure_reason = 'Delivery worker claim expired'
+        WHERE status = 'PROCESSING' AND claimed_at &lt; #{expiredBefore} AND deleted = FALSE
+    </update>
+
+    <update id="markSucceeded">
+        UPDATE notification_deliveries SET status = 'SUCCEEDED', last_attempt_at = #{attemptedAt},
+            response_status = #{responseStatus}, failure_reason = NULL, claimed_at = NULL
+        WHERE id = #{id} AND status = 'PROCESSING' AND deleted = FALSE
+    </update>
+    <update id="markRetry">
+        UPDATE notification_deliveries SET status = 'RETRY', retry_count = #{retryCount}, last_attempt_at = #{attemptedAt},
+            next_attempt_at = #{nextAttemptAt}, response_status = #{responseStatus}, failure_reason = #{failureReason}, claimed_at = NULL
+        WHERE id = #{id} AND status = 'PROCESSING' AND deleted = FALSE
+    </update>
+    <update id="markFailed">
+        UPDATE notification_deliveries SET status = 'FAILED', retry_count = #{retryCount}, last_attempt_at = #{attemptedAt},
+            response_status = #{responseStatus}, failure_reason = #{failureReason}, claimed_at = NULL
+        WHERE id = #{id} AND status = 'PROCESSING' AND deleted = FALSE
+    </update>
 </mapper>

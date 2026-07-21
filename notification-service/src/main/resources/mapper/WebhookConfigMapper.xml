@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.czu.claimpaws.notification.persistence.WebhookConfigMapper">
+    <select id="findEnabled" resultType="cn.czu.claimpaws.notification.domain.WebhookConfig">
+        SELECT id, endpoint_url, encrypted_secret, enabled
+        FROM webhook_configs WHERE enabled = TRUE AND deleted = FALSE ORDER BY id
+    </select>
+    <insert id="insert">
+        INSERT INTO webhook_configs(endpoint_url, encrypted_secret, enabled, deleted)
+        VALUES(#{endpointUrl}, #{encryptedSecret}, TRUE, FALSE)
+    </insert>
+</mapper>

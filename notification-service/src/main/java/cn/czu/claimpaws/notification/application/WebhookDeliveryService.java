@@ -3,69 +3,60 @@ package cn.czu.claimpaws.notification.application;
 import cn.czu.claimpaws.common.event.DomainEvent;
 import cn.czu.claimpaws.notification.domain.NotificationDelivery;
 import cn.czu.claimpaws.notification.persistence.DeliveryMapper;
-import org.springframework.beans.factory.annotation.Value;
+import cn.czu.claimpaws.notification.persistence.WebhookConfigMapper;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 
 @Service
 public class WebhookDeliveryService {
 
     private final DeliveryMapper deliveryMapper;
-    private final String webhookSecret;
-    private final boolean webhookEnabled;
-    private final int connectTimeout;
-    private final int readTimeout;
-    private final int maxRetries;
+    private final WebhookConfigMapper webhookConfigMapper;
 
-    public WebhookDeliveryService(DeliveryMapper deliveryMapper,
-                                  @Value("${webhook.secret:changeit}") String webhookSecret,
-                                  @Value("${notification.webhook.enabled:true}") boolean webhookEnabled,
-                                  @Value("${notification.webhook.connect-timeout:5000}") int connectTimeout,
-                                  @Value("${notification.webhook.read-timeout:10000}") int readTimeout,
-                                  @Value("${notification.webhook.max-retries:3}") int maxRetries) {
+    public WebhookDeliveryService(DeliveryMapper deliveryMapper, WebhookConfigMapper webhookConfigMapper) {
         this.deliveryMapper = deliveryMapper;
-        this.webhookSecret = webhookSecret;
-        this.webhookEnabled = webhookEnabled;
-        this.connectTimeout = connectTimeout;
-        this.readTimeout = readTimeout;
-        this.maxRetries = maxRetries;
+        this.webhookConfigMapper = webhookConfigMapper;
     }
 
     @Transactional
     public void createDeliveries(DomainEvent event) {
         String payload = event.payload().toString();
-        String signature = sign(payload);
-        NotificationDelivery delivery = new NotificationDelivery(
-                null,
-                event.eventId().toString(),
-                event.eventType(),
-                payload,
-                signature,
-                "PENDING",
-                0,
-                null,
-                null,
-                null
-        );
-        deliveryMapper.insert(delivery);
+        webhookConfigMapper.findEnabled().forEach(config -> deliveryMapper.insert(new NotificationDelivery(
+                null, config.id(), event.eventId().toString(), event.eventType(), payload, config.endpointUrl(),
+                "PENDING", 0, null, LocalDateTime.now(ZoneOffset.UTC), null, null, null, null)));
     }
 
-    String sign(String payload) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec keySpec = new SecretKeySpec(webhookSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            mac.init(keySpec);
-            byte[] hmac = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hmac);
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("HMAC signing failed", e);
-        }
+    @Transactional
+    public List<cn.czu.claimpaws.notification.domain.WebhookDeliveryTask> claimDue(LocalDateTime now, int limit) {
+        recoverExpiredClaims(now.minusMinutes(5));
+        return deliveryMapper.findDue(now, limit).stream()
+                .filter(task -> deliveryMapper.markProcessing(task.id()) == 1)
+                .toList();
+    }
+
+    @Transactional
+    public void recoverExpiredClaims(LocalDateTime expiredBefore) {
+        deliveryMapper.recoverExpiredClaims(expiredBefore);
+    }
+
+    @Transactional
+    public void markSucceeded(long id, LocalDateTime attemptedAt, int responseStatus) {
+        deliveryMapper.markSucceeded(id, attemptedAt, responseStatus);
+    }
+
+    @Transactional
+    public void markRetry(long id, int retryCount, LocalDateTime attemptedAt, LocalDateTime nextAttemptAt,
+                          Integer responseStatus, String failureReason) {
+        deliveryMapper.markRetry(id, retryCount, attemptedAt, nextAttemptAt, responseStatus, failureReason);
+    }
+
+    @Transactional
+    public void markFailed(long id, int retryCount, LocalDateTime attemptedAt, Integer responseStatus,
+                           String failureReason) {
+        deliveryMapper.markFailed(id, retryCount, attemptedAt, responseStatus, failureReason);
     }
 }

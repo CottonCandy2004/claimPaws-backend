@@ -17,6 +17,9 @@ public class JwtTokenService {
     private final SecretKey signingKey;
 
     public JwtTokenService(@Value("${jwt.secret}") String secret) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalArgumentException("JWT secret must be configured");
+        }
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 

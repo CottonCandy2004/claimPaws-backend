@@ -11,14 +11,16 @@ spring:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DB:claimpaws_notification}?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:root}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
   flyway:
     enabled: true
     locations: classpath:db/migration
   rabbitmq:
     host: ${RABBITMQ_HOST:127.0.0.1}
     port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
@@ -34,3 +36,5 @@ notification:
     connect-timeout: 5000
     read-timeout: 10000
     max-retries: 3
+    retry-base-seconds: 5
+    encryption-key: ${WEBHOOK_ENCRYPTION_KEY}

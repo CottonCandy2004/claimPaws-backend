@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    username: ${MYSQL_USER:claimpaws}
+    password: ${MYSQL_PASSWORD:local-dev-only}

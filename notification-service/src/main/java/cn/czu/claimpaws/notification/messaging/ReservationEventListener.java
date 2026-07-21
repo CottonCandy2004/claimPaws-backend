@@ -19,13 +19,12 @@ public class ReservationEventListener {
         this.webhookDeliveryService = webhookDeliveryService;
     }
 
-    @RabbitListener(queues = "notification.reservation.events")
+    @RabbitListener(queues = "notification.reservation.events", containerFactory = "notificationRabbitListenerContainerFactory")
     @Transactional
     public void consume(DomainEvent event) {
-        if (consumedEventMapper.countByEventId(event.eventId().toString()) > 0) {
+        if (consumedEventMapper.insertIfAbsent(event.eventId().toString()) == 0) {
             return;
         }
-        consumedEventMapper.insert(event.eventId().toString());
         webhookDeliveryService.createDeliveries(event);
     }
 }

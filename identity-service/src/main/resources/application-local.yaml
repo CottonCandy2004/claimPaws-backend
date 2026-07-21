@@ -1,0 +1,10 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    username: ${MYSQL_USER:claimpaws}
+    password: ${MYSQL_PASSWORD:local-dev-only}
+
+jwt:
+  secret: ${JWT_SECRET:local-dev-jwt-secret-change-me-32-bytes}

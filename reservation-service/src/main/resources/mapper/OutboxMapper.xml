@@ -12,16 +12,37 @@
         SELECT COUNT(*) FROM outbox_messages WHERE event_type = #{eventType}
     </select>
 
-    <select id="findPending" resultType="cn.czu.claimpaws.reservation.domain.OutboxMessage">
+    <select id="findByAggregateId" resultType="cn.czu.claimpaws.reservation.domain.OutboxMessage">
+        SELECT id, event_id AS eventId, event_type AS eventType, aggregate_id AS aggregateId,
+               schema_version AS schemaVersion, payload, status, occurred_at AS occurredAt, created_at AS createdAt
+        FROM outbox_messages WHERE aggregate_id = #{aggregateId} ORDER BY id DESC LIMIT 1
+    </select>
+
+    <select id="findClaimCandidates" resultType="cn.czu.claimpaws.reservation.domain.OutboxMessage">
         SELECT id, event_id AS eventId, event_type AS eventType, aggregate_id AS aggregateId,
                schema_version AS schemaVersion, payload, status, occurred_at AS occurredAt, created_at AS createdAt
         FROM outbox_messages
-        WHERE status = 'PENDING'
+        WHERE status = 'PENDING' OR (status = 'PUBLISHING' AND lock_until &lt; UTC_TIMESTAMP())
         ORDER BY created_at ASC
         LIMIT 100
     </select>
 
+    <update id="claim">
+        UPDATE outbox_messages
+        SET status = 'PUBLISHING', lock_owner = #{owner}, lock_until = #{lockedUntil}
+        WHERE id = #{id}
+          AND (status = 'PENDING' OR (status = 'PUBLISHING' AND lock_until &lt; UTC_TIMESTAMP()))
+    </update>
+
     <update id="updateStatus">
-        UPDATE outbox_messages SET status = #{status} WHERE id = #{id}
+        UPDATE outbox_messages
+        SET status = #{status}, lock_owner = NULL, lock_until = NULL
+        WHERE id = #{id} AND status = 'PUBLISHING' AND lock_owner = #{owner}
+    </update>
+
+    <update id="releaseClaim">
+        UPDATE outbox_messages
+        SET status = 'PENDING', lock_owner = NULL, lock_until = NULL
+        WHERE id = #{id} AND status = 'PUBLISHING' AND lock_owner = #{owner}
     </update>
 </mapper>

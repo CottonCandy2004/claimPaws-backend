@@ -13,14 +13,25 @@
           AND status NOT IN ('CANCELLED', 'REJECTED')
     </select>
 
-    <insert id="insert">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO reservations (user_id, resource_id, resource_name, resource_type, start_at, end_at, status, approval_level)
         VALUES (#{userId}, #{resourceId}, #{resourceName}, #{resourceType}, #{startAt}, #{endAt}, #{status}, #{approvalLevel})
     </insert>
 
-    <select id="lastInsertId" resultType="long">
-        SELECT LAST_INSERT_ID()
-    </select>
+    <insert id="insertOccupiedSlots">
+        INSERT INTO reservation_occupied_slots (resource_id, slot_start_at, reservation_id)
+        SELECT #{resourceId}, slot_start_at, #{reservationId}
+        FROM (
+            SELECT FROM_UNIXTIME((FLOOR(UNIX_TIMESTAMP(#{startAt}) / (#{slotMinutes} * 60)) + sequence_number) * #{slotMinutes} * 60) AS slot_start_at
+            FROM (
+                SELECT ones.n + tens.n * 10 + hundreds.n * 100 AS sequence_number
+                FROM (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) ones
+                CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) tens
+                CROSS JOIN (SELECT 0 n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) hundreds
+            ) numbers
+        ) slots
+        WHERE slot_start_at &lt; #{endAt}
+    </insert>
 
     <select id="count" resultType="long">
         SELECT COUNT(*) FROM reservations WHERE deleted = FALSE

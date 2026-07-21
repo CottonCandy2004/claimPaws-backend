@@ -5,9 +5,6 @@ spring:
         enabled: false
       config:
         enabled: false
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
   flyway:
@@ -16,5 +13,11 @@ mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
-webhook:
-  secret: test-secret
+notification:
+  webhook:
+    enabled: false
+    connect-timeout: 5000
+    read-timeout: 10000
+    max-retries: 3
+    retry-base-seconds: 5
+    encryption-key: MDEyMzQ1Njc4OWFiY2RlZg==
