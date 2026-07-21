@@ -1,5 +1,7 @@
 package cn.czu.claimpaws.reservation.application;
 
+import cn.czu.claimpaws.common.exception.BusinessException;
+import cn.czu.claimpaws.common.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +14,7 @@ public class IdempotencyService {
     public <T> T execute(long userId, String key, Supplier<T> action) {
         String compositeKey = userId + ":" + key;
         if (processed.containsKey(compositeKey)) {
-            throw new RuntimeException("Idempotency key already used");
+            throw new BusinessException(ErrorCode.IDEMPOTENCY_KEY_REUSED);
         }
         T result = action.get();
         processed.put(compositeKey, true);
