@@ -1,0 +1,39 @@
+CREATE TABLE reservations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    resource_id BIGINT NOT NULL,
+    resource_name VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(20) NOT NULL,
+    start_at DATETIME NOT NULL,
+    end_at DATETIME NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING_APPROVAL',
+    approval_level INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE outbox_messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_id VARCHAR(36) NOT NULL UNIQUE,
+    event_type VARCHAR(100) NOT NULL,
+    aggregate_id BIGINT NOT NULL,
+    schema_version INT NOT NULL DEFAULT 1,
+    payload JSON NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_status (status),
+    INDEX idx_event_type (event_type)
+);
+
+CREATE TABLE approval_records (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    reservation_id BIGINT NOT NULL,
+    approver_id BIGINT,
+    level INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN DEFAULT FALSE
+);

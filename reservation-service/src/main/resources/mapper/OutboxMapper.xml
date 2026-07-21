@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.czu.claimpaws.reservation.persistence.OutboxMapper">
+
+    <insert id="insert">
+        INSERT INTO outbox_messages (event_id, event_type, aggregate_id, schema_version, payload, status)
+        VALUES (#{eventId}, #{eventType}, #{aggregateId}, #{schemaVersion}, #{payload}, #{status})
+    </insert>
+
+    <select id="countByType" resultType="long">
+        SELECT COUNT(*) FROM outbox_messages WHERE event_type = #{eventType}
+    </select>
+</mapper>

@@ -1,0 +1,52 @@
+package cn.czu.claimpaws.reservation.application;
+
+import cn.czu.claimpaws.common.exception.BusinessException;
+import cn.czu.claimpaws.common.exception.ErrorCode;
+import cn.czu.claimpaws.reservation.domain.CreateReservationCommand;
+import cn.czu.claimpaws.reservation.domain.OutboxMessage;
+import cn.czu.claimpaws.reservation.domain.Reservation;
+import cn.czu.claimpaws.reservation.domain.ReservationView;
+import cn.czu.claimpaws.reservation.infrastructure.ResourceClient;
+import cn.czu.claimpaws.reservation.infrastructure.ReservationSnapshotDTO;
+import cn.czu.claimpaws.reservation.persistence.OutboxMapper;
+import cn.czu.claimpaws.reservation.persistence.ReservationMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class ReservationService {
+
+    private final ResourceClient resourceClient;
+    private final ReservationMapper reservationMapper;
+    private final OutboxMapper outboxMapper;
+    private final ReservationValidator validator;
+    private final IdempotencyService idempotency;
+    private final ReservationLock reservationLock;
+
+    public ReservationService(ResourceClient resourceClient, ReservationMapper reservationMapper,
+                              OutboxMapper outboxMapper, ReservationValidator validator,
+                              IdempotencyService idempotency, ReservationLock reservationLock) {
+        this.resourceClient = resourceClient;
+        this.reservationMapper = reservationMapper;
+        this.outboxMapper = outboxMapper;
+        this.validator = validator;
+        this.idempotency = idempotency;
+        this.reservationLock = reservationLock;
+    }
+
+    @Transactional
+    public ReservationView create(long userId, String key, CreateReservationCommand command) {
+        ReservationSnapshotDTO snapshot = resourceClient.getSnapshot(command.resourceId());
+        return idempotency.execute(userId, key, () -> reservationLock.withLock(command, () -> {
+            validator.validate(command, snapshot);
+            if (reservationMapper.existsOverlap(command.resourceId(), command.startAt(), command.endAt())) {
+                throw new BusinessException(ErrorCode.RESERVATION_TIME_CONFLICT);
+            }
+            Reservation reservation = Reservation.create(userId, command, snapshot);
+            reservationMapper.insert(reservation);
+            long id = reservationMapper.lastInsertId();
+            outboxMapper.insert(OutboxMessage.created(DomainEvents.reservationCreated(reservation)));
+            return ReservationView.from(reservation, id);
+        }));
+    }
+}
