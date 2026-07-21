@@ -8,7 +8,7 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO notification_deliveries (event_id, event_type, payload, signature, status, retry_count)
-        VALUES (#{eventId}, #{eventType}, #{payload}, #{signature}, #{status}, #{retryCount})
+        INSERT INTO notification_deliveries (event_id, event_type, payload, signature, status, retry_count, deleted)
+        VALUES (#{eventId}, #{eventType}, #{payload}, #{signature}, #{status}, #{retryCount}, FALSE)
     </insert>
 </mapper>

@@ -4,8 +4,8 @@
 <mapper namespace="cn.czu.claimpaws.reservation.persistence.OutboxMapper">
 
     <insert id="insert">
-        INSERT INTO outbox_messages (event_id, event_type, aggregate_id, schema_version, payload, status)
-        VALUES (#{eventId}, #{eventType}, #{aggregateId}, #{schemaVersion}, #{payload}, #{status})
+        INSERT INTO outbox_messages (event_id, event_type, aggregate_id, schema_version, payload, status, occurred_at)
+        VALUES (#{eventId}, #{eventType}, #{aggregateId}, #{schemaVersion}, #{payload}, #{status}, #{occurredAt})
     </insert>
 
     <select id="countByType" resultType="long">
@@ -14,9 +14,11 @@
 
     <select id="findPending" resultType="cn.czu.claimpaws.reservation.domain.OutboxMessage">
         SELECT id, event_id AS eventId, event_type AS eventType, aggregate_id AS aggregateId,
-               schema_version AS schemaVersion, payload, status, created_at AS createdAt
+               schema_version AS schemaVersion, payload, status, occurred_at AS occurredAt, created_at AS createdAt
         FROM outbox_messages
         WHERE status = 'PENDING'
+        ORDER BY created_at ASC
+        LIMIT 100
     </select>
 
     <update id="updateStatus">

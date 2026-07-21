@@ -12,6 +12,7 @@ public record OutboxMessage(
         int schemaVersion,
         String payload,
         String status,
+        LocalDateTime occurredAt,
         LocalDateTime createdAt
 ) {
     public static OutboxMessage created(DomainEvent event) {
@@ -23,6 +24,7 @@ public record OutboxMessage(
                 event.schemaVersion(),
                 event.payload().toString(),
                 "PENDING",
+                LocalDateTime.ofInstant(event.occurredAt(), java.time.ZoneOffset.UTC),
                 LocalDateTime.now()
         );
     }

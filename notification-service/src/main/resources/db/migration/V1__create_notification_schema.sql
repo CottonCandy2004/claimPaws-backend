@@ -2,6 +2,8 @@ CREATE TABLE consumed_events (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     event_id VARCHAR(36) NOT NULL UNIQUE,
     consumed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN DEFAULT FALSE,
     INDEX idx_event_id (event_id)
 );
 
@@ -16,6 +18,7 @@ CREATE TABLE notification_deliveries (
     last_attempt_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN DEFAULT FALSE,
     INDEX idx_event_id (event_id),
     INDEX idx_status (status)
 );

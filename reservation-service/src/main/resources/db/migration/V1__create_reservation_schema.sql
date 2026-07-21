@@ -21,6 +21,7 @@ CREATE TABLE outbox_messages (
     schema_version INT NOT NULL DEFAULT 1,
     payload JSON NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    occurred_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_status (status),
     INDEX idx_event_type (event_type)

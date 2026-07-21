@@ -19,11 +19,23 @@ public class WebhookDeliveryService {
 
     private final DeliveryMapper deliveryMapper;
     private final String webhookSecret;
+    private final boolean webhookEnabled;
+    private final int connectTimeout;
+    private final int readTimeout;
+    private final int maxRetries;
 
     public WebhookDeliveryService(DeliveryMapper deliveryMapper,
-                                  @Value("${webhook.secret:changeit}") String webhookSecret) {
+                                  @Value("${webhook.secret:changeit}") String webhookSecret,
+                                  @Value("${notification.webhook.enabled:true}") boolean webhookEnabled,
+                                  @Value("${notification.webhook.connect-timeout:5000}") int connectTimeout,
+                                  @Value("${notification.webhook.read-timeout:10000}") int readTimeout,
+                                  @Value("${notification.webhook.max-retries:3}") int maxRetries) {
         this.deliveryMapper = deliveryMapper;
         this.webhookSecret = webhookSecret;
+        this.webhookEnabled = webhookEnabled;
+        this.connectTimeout = connectTimeout;
+        this.readTimeout = readTimeout;
+        this.maxRetries = maxRetries;
     }
 
     @Transactional

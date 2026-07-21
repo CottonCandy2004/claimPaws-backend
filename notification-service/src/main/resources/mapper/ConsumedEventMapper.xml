@@ -8,6 +8,6 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO consumed_events(event_id) VALUES(#{eventId})
+        INSERT INTO consumed_events(event_id, deleted) VALUES(#{eventId}, FALSE)
     </insert>
 </mapper>
