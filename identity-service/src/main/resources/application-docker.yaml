@@ -1,0 +1,27 @@
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
+  config:
+    import: optional:nacos:${NACOS_SERVER_ADDR:nacos:8848}
+  datasource:
+    url: jdbc:mysql://mysql:3306/claimpaws_identity?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
+    username: ${MYSQL_USER:claimpaws}
+    password: ${MYSQL_PASSWORD:local-dev-only}
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+jwt:
+  secret: ${JWT_SECRET:local-dev-jwt-secret-change-me-32-bytes}
+
+server:
+  port: 8081
