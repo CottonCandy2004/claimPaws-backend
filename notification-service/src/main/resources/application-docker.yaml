@@ -1,0 +1,34 @@
+spring:
+  config:
+    activate:
+      on-profile: docker
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
+  config:
+    import: optional:nacos:${NACOS_SERVER_ADDR:nacos:8848}
+  datasource:
+    url: jdbc:mysql://mysql:3306/claimpaws_notification?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
+    username: ${MYSQL_USER:claimpaws}
+    password: ${MYSQL_PASSWORD:local-dev-only}
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: ${RABBITMQ_USERNAME:claimpaws}
+    password: ${RABBITMQ_PASSWORD:local-dev-only}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+notification:
+  webhook:
+    enabled: true
+    connect-timeout: 5000
+    read-timeout: 10000
+    max-retries: 3
+    retry-base-seconds: 5
+    encryption-key: ${WEBHOOK_ENCRYPTION_KEY:MDEyMzQ1Njc4OWFiY2RlZg==}
+
+server:
+  port: 8084
