@@ -6,18 +6,23 @@
         <el-button type="primary" @click="handleCreate">新增策略</el-button>
       </div>
       <el-table :data="data" v-loading="loading" stripe border style="margin-top: 16px">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="策略名称" />
-        <el-table-column label="资源类型" width="100">
-          <template #default="{ row }">{{ row.resourceType === 'MEETING_ROOM' ? '会议室' : '工位' }}</template>
+        <el-table-column prop="id" label="ID" width="60" />
+        <el-table-column prop="name" label="策略名称" width="120" />
+        <el-table-column label="资源类型" width="80">
+          <template #default="{ row }">{{ row.resourceType || '会议室' }}</template>
         </el-table-column>
-        <el-table-column label="审批" width="120">
+        <el-table-column prop="slotMinutes" label="时段粒度" width="80" />
+        <el-table-column prop="advanceDays" label="预约提前" width="80" />
+        <el-table-column prop="minDurationMinutes" label="最短时长" width="80" />
+        <el-table-column prop="maxDurationMinutes" label="最长时长" width="80" />
+        <el-table-column prop="cancelDeadlineMinutes" label="取消截止" width="80" />
+        <el-table-column prop="checkInWindowMinutes" label="签到窗口" width="80" />
+        <el-table-column label="审批" width="100">
           <template #default="{ row }">{{ approvalLabel(row.approvalLevel) }}</template>
         </el-table-column>
-        <el-table-column label="审批角色" width="150">
-          <template #default="{ row }">{{ row.approverRoles || '-' }}</template>
+        <el-table-column prop="description" label="审批角色" width="120">
+          <template #default="{ row }">{{ row.description || '-' }}</template>
         </el-table-column>
-        <el-table-column prop="maxDuration" label="最长时长(min)" width="110" />
         <el-table-column label="操作" width="180">
           <template #default="{ row }">
             <el-button size="small" @click="handleEdit(row)">编辑</el-button>

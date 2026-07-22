@@ -75,6 +75,7 @@ public class PolicyController {
         ReservationPolicy policy = new ReservationPolicy(
                 null,
                 body.get("resourceId") != null ? Long.valueOf(body.get("resourceId").toString()) : 0L,
+                (String) body.getOrDefault("name", ""),
                 body.get("timeSlotGranularity") != null ? Integer.valueOf(body.get("timeSlotGranularity").toString()) : 30,
                 body.get("advanceBookingDays") != null ? Integer.valueOf(body.get("advanceBookingDays").toString()) : 7,
                 body.get("minDuration") != null ? Integer.valueOf(body.get("minDuration").toString()) : 30,
@@ -83,6 +84,7 @@ public class PolicyController {
                 body.get("checkInWindow") != null ? Integer.valueOf(body.get("checkInWindow").toString()) : 15,
                 body.get("approvalLevel") != null && Integer.valueOf(body.get("approvalLevel").toString()) > 0,
                 body.get("approvalLevel") != null ? Integer.valueOf(body.get("approvalLevel").toString()) : 0,
+                (String) body.getOrDefault("description", ""),
                 true, null, null, null
         );
         policyMapper.insert(policy);
@@ -101,15 +103,17 @@ public class PolicyController {
         ReservationPolicy toUpdate = new ReservationPolicy(
                 id,
                 policy.resourceId(),
-                policy.slotMinutes(),
-                policy.advanceDays(),
-                policy.minDurationMinutes(),
-                policy.maxDurationMinutes(),
-                policy.cancelDeadlineMinutes(),
-                policy.checkInWindowMinutes(),
-                policy.requiresApproval(),
-                policy.approvalLevel(),
-                policy.active(),
+                policy.name() != null ? policy.name() : existing.name(),
+                policy.slotMinutes() != null ? policy.slotMinutes() : existing.slotMinutes(),
+                policy.advanceDays() != null ? policy.advanceDays() : existing.advanceDays(),
+                policy.minDurationMinutes() != null ? policy.minDurationMinutes() : existing.minDurationMinutes(),
+                policy.maxDurationMinutes() != null ? policy.maxDurationMinutes() : existing.maxDurationMinutes(),
+                policy.cancelDeadlineMinutes() != null ? policy.cancelDeadlineMinutes() : existing.cancelDeadlineMinutes(),
+                policy.checkInWindowMinutes() != null ? policy.checkInWindowMinutes() : existing.checkInWindowMinutes(),
+                policy.requiresApproval() != null ? policy.requiresApproval() : existing.requiresApproval(),
+                policy.approvalLevel() != null ? policy.approvalLevel() : existing.approvalLevel(),
+                policy.description() != null ? policy.description() : existing.description(),
+                policy.active() != null ? policy.active() : existing.active(),
                 null,
                 null,
                 existing.deleted()

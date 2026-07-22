@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record ReservationPolicy(
         Long id,
         Long resourceId,
+        String name,
         Integer slotMinutes,
         Integer advanceDays,
         Integer minDurationMinutes,
@@ -13,6 +14,7 @@ public record ReservationPolicy(
         Integer checkInWindowMinutes,
         Boolean requiresApproval,
         Integer approvalLevel,
+        String description,
         Boolean active,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
