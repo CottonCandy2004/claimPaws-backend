@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> { code: number; message: string; data: T }
+export interface ApiResponse<T = any> { success: boolean; code: string | null; message: string | null; data: T; requestId: string | null }
 
 export interface PageResult<T> { records: T[]; total: number; page: number; size: number }
 export interface PageParams { page: number; size: number; sort?: string }
