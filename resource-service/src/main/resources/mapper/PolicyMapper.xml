@@ -27,4 +27,60 @@
         LIMIT 1
     </select>
 
+    <select id="findPage" resultMap="policyResultMap">
+        SELECT * FROM reservation_policies
+        WHERE deleted = FALSE
+        <if test="keyword != null and keyword != ''">
+            AND resource_id LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM reservation_policies
+        WHERE deleted = FALSE
+        <if test="keyword != null and keyword != ''">
+            AND resource_id LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <select id="findById" resultMap="policyResultMap">
+        SELECT * FROM reservation_policies
+        WHERE id = #{id} AND deleted = FALSE
+    </select>
+
+    <select id="findByResourceId" resultMap="policyResultMap">
+        SELECT * FROM reservation_policies
+        WHERE resource_id = #{resourceId} AND deleted = FALSE
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id">
+        INSERT INTO reservation_policies (resource_id, slot_minutes, advance_days, min_duration_minutes, max_duration_minutes, cancel_deadline_minutes, check_in_window_minutes, requires_approval, approval_level, active, created_at, updated_at)
+        VALUES (#{resourceId}, #{slotMinutes}, #{advanceDays}, #{minDurationMinutes}, #{maxDurationMinutes}, #{cancelDeadlineMinutes}, #{checkInWindowMinutes}, #{requiresApproval}, #{approvalLevel}, #{active}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE reservation_policies
+        SET resource_id = #{resourceId},
+            slot_minutes = #{slotMinutes},
+            advance_days = #{advanceDays},
+            min_duration_minutes = #{minDurationMinutes},
+            max_duration_minutes = #{maxDurationMinutes},
+            cancel_deadline_minutes = #{cancelDeadlineMinutes},
+            check_in_window_minutes = #{checkInWindowMinutes},
+            requires_approval = #{requiresApproval},
+            approval_level = #{approvalLevel},
+            active = #{active},
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
+    <update id="deleteById">
+        UPDATE reservation_policies SET deleted = TRUE, updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
 </mapper>

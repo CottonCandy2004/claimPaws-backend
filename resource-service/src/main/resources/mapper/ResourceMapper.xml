@@ -23,4 +23,85 @@
         WHERE id = #{id} AND active = TRUE AND deleted = FALSE
     </select>
 
+    <select id="findPage" resultMap="resourceResultMap">
+        SELECT * FROM resources
+        WHERE deleted = FALSE
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        <if test="parentId != null">
+            AND (building = (SELECT p.name FROM resources p WHERE p.id = #{parentId} AND p.deleted = FALSE)
+              OR floor = (SELECT p.name FROM resources p WHERE p.id = #{parentId} AND p.deleted = FALSE))
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (name LIKE CONCAT('%', #{keyword}, '%')
+              OR building LIKE CONCAT('%', #{keyword}, '%')
+              OR floor LIKE CONCAT('%', #{keyword}, '%')
+              OR description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY id
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM resources
+        WHERE deleted = FALSE
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        <if test="parentId != null">
+            AND (building = (SELECT p.name FROM resources p WHERE p.id = #{parentId} AND p.deleted = FALSE)
+              OR floor = (SELECT p.name FROM resources p WHERE p.id = #{parentId} AND p.deleted = FALSE))
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (name LIKE CONCAT('%', #{keyword}, '%')
+              OR building LIKE CONCAT('%', #{keyword}, '%')
+              OR floor LIKE CONCAT('%', #{keyword}, '%')
+              OR description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <select id="findAllByType" resultMap="resourceResultMap">
+        SELECT * FROM resources
+        WHERE type = #{type} AND active = TRUE AND deleted = FALSE
+        ORDER BY id
+    </select>
+
+    <select id="findByParentId" resultMap="resourceResultMap">
+        SELECT * FROM resources
+        WHERE type = #{type}
+          AND deleted = FALSE
+          AND (building = (SELECT p.name FROM resources p WHERE p.id = #{parentId} AND p.deleted = FALSE)
+            OR floor = (SELECT p.name FROM resources p WHERE p.id = #{parentId} AND p.deleted = FALSE))
+        ORDER BY id
+    </select>
+
+    <select id="findById" resultMap="resourceResultMap">
+        SELECT * FROM resources
+        WHERE id = #{id} AND deleted = FALSE
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id">
+        INSERT INTO resources (name, type, floor, building, capacity, description, active, created_at, updated_at)
+        VALUES (#{name}, #{type}, #{floor}, #{building}, #{capacity}, #{description}, #{active}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE resources
+        SET name = #{name},
+            type = #{type},
+            floor = #{floor},
+            building = #{building},
+            capacity = #{capacity},
+            description = #{description},
+            active = #{active},
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
+    <update id="deleteById">
+        UPDATE resources SET deleted = TRUE, updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
 </mapper>
