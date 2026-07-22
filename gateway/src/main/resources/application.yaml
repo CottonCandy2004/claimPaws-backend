@@ -2,6 +2,11 @@ server:
   port: 8080
 
 spring:
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
   application:
     name: gateway
   cloud:

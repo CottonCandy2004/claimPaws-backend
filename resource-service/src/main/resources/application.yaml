@@ -2,6 +2,11 @@ server:
   port: 8082
 
 spring:
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
   application:
     name: resource-service
   cloud:

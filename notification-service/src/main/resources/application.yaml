@@ -1,6 +1,11 @@
 server:
   port: 8084
 spring:
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
   application:
     name: notification-service
   cloud:
