@@ -238,12 +238,6 @@ public class ResourcePublicController {
         resourceMapper.update(toUpdate);
         return ApiResponse.success(resourceMapper.findById(id), requestId);
     }
-                body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : existing.capacity(),
-                (String) body.getOrDefault("description", existing.description()),
-                existing.active(), null, null, existing.deleted());
-        resourceMapper.update(toUpdate);
-        return ApiResponse.success(resourceMapper.findById(id), requestId);
-    }
 
     private ApiResponse<Void> deleteResource(long id, String requestId) {
         if (resourceMapper.findById(id) == null) return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
