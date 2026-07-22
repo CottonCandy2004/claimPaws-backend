@@ -45,10 +45,6 @@ router.beforeEach(async (to, _from, next) => {
     return
   }
   if (!auth.isLoggedIn) { next('/login'); return }
-  if (!auth.userInfo) {
-    try { await auth.fetchUserInfo() } catch { auth.logout(); next('/login'); return }
-  }
-  if (to.meta.permission && !auth.hasPermission(to.meta.permission as string)) { next('/dashboard'); return }
   next()
 })
 
