@@ -23,7 +23,11 @@
     <el-dialog v-model="dialogVisible" :title="editingId ? '编辑设施' : '新增设施'" width="480px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="名称" prop="name"><el-input v-model="form.name" /></el-form-item>
-        <el-form-item label="类型" prop="type"><el-input v-model="form.type" /></el-form-item>
+        <el-form-item label="类型" prop="type">
+          <el-select v-model="form.type" placeholder="选择类型" style="width: 100%" allow-create filterable>
+            <el-option v-for="t in facilityTypes" :key="t" :label="t" :value="t" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="描述"><el-input v-model="form.description" type="textarea" /></el-form-item>
       </el-form>
       <template #footer>
@@ -49,6 +53,7 @@ const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
 const form = ref({ name: '', type: '', description: '' })
+const facilityTypes = ['投影仪', '白板', '视频会议设备', '音响系统', '打印机', '饮水机', '网络设备', '空调', '其他']
 const rules: FormRules = { name: [{ required: true, message: '请输入设施名称', trigger: 'blur' }], type: [{ required: true, message: '请输入设施类型', trigger: 'blur' }] }
 
 async function fetchData() {

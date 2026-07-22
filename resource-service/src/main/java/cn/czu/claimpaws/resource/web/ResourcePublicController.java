@@ -214,6 +214,7 @@ public class ResourcePublicController {
                 String s = r.description();
                 m.put("sort", s != null && !s.isEmpty() ? Integer.parseInt(s) : 0);
             }
+            if ("FACILITY".equals(type)) m.put("type", r.floor());
             return m;
         }).toList();
         Map<String, Object> data = new HashMap<>();
@@ -233,12 +234,14 @@ public class ResourcePublicController {
             case "BUILDING" -> building = parentName; // campus name → building field
             case "FLOOR" -> { building = parentName; floor = parentName; } // building name → building field
             case "ROOM", "WORKSTATION" -> {
-                floor = parentName; // floor name → floor field
+                floor = parentName;
                 if (body.get("floorId") != null) {
                     Long floorId = Long.valueOf(body.get("floorId").toString());
                     Resource floorRes = resourceMapper.findById(floorId);
-                    if (floorRes != null) building = floorRes.building(); // building name → building field
+                    if (floorRes != null) building = floorRes.building();
                 }
+            }
+            case "FACILITY" -> floor = (String) body.getOrDefault("type", "");
             }
         }
         String desc = "CAMPUS".equals(type) ? (String) body.getOrDefault("address", "")
@@ -274,6 +277,9 @@ public class ResourcePublicController {
                 ? parentName : existing.building();
         String floor = ("FLOOR".equals(existing.type()) || "ROOM".equals(existing.type()) || "WORKSTATION".equals(existing.type()))
                 ? (parentName.isEmpty() ? existing.floor() : parentName) : existing.floor();
+        if ("FACILITY".equals(existing.type()) && body.containsKey("type")) {
+            floor = (String) body.getOrDefault("type", existing.floor());
+        }
         if (body.containsKey("floorId") && body.get("floorId") != null) {
             Long floorId = Long.valueOf(body.get("floorId").toString());
             Resource floorRes = resourceMapper.findById(floorId);
