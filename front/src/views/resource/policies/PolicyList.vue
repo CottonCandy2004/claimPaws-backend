@@ -111,7 +111,7 @@ const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
 const form = ref({
-  name: '', resourceType: 'MEETING_ROOM' as string,
+  name: '',   resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION',
   timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30,
   maxDuration: 240, cancelDeadline: 60, checkInWindow: 15,
   noShowPenalty: 0, approvalLevel: 0 as number, approverRoles: ''
