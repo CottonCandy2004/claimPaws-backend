@@ -56,6 +56,8 @@ services:
     environment:
       MODE: standalone
       PREFER_HOST_MODE: hostname
+      NACOS_SERVER_IP: nacos
+      NACOS_APPLICATION_PORT: "8848"
       NACOS_AUTH_ENABLE: "false"
     ports:
       - "127.0.0.1:8848:8848"
