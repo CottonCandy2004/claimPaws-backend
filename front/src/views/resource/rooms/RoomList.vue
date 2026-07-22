@@ -21,7 +21,7 @@
       <el-pagination v-model:current-page="pageParams.page" v-model:page-size="pageParams.size" :total="total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next, jumper" style="margin-top: 16px; justify-content: flex-end" @size-change="fetchData" @current-change="fetchData" />
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="editingId ? '编辑会议室' : '新增会议室'" width="480px">
+    <el-dialog v-if="dialogVisible" v-model="dialogVisible" :title="editingId ? '编辑会议室' : '新增会议室'" width="480px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="名称" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="所属楼层" prop="floorId">
