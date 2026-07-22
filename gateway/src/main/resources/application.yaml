@@ -1,27 +1,23 @@
 server:
   port: 8080
-
 spring:
-  cloud:
-    nacos:
-      config:
-        import-check:
-          enabled: false
-  application:
-    name: gateway
   cloud:
     nacos:
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      config:
+        import-check:
+          enabled: false
     gateway:
       server:
         webflux:
           routes:
-            - id: identity
-              uri: lb://identity-service
-              predicates:
-                - Path=/api/v1/auth/**
-
+          - id: identity
+            uri: lb://identity-service
+            predicates:
+            - Path=/api/v1/auth/**
+  application:
+    name: gateway
 management:
   endpoints:
     web:

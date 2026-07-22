@@ -1,18 +1,15 @@
 server:
   port: 8081
-
 spring:
   cloud:
     nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
       config:
         import-check:
           enabled: false
   application:
     name: identity-service
-  cloud:
-    nacos:
-      discovery:
-        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DB:claimpaws_identity}?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
     username: ${MYSQL_USER}
@@ -24,13 +21,10 @@ spring:
     redis:
       host: ${REDIS_HOST:127.0.0.1}
       port: ${REDIS_PORT:6379}
-
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-
 jwt:
   secret: ${JWT_SECRET}
-
 management:
   endpoints:
     web:

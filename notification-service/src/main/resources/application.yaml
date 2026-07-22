@@ -3,15 +3,13 @@ server:
 spring:
   cloud:
     nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
       config:
         import-check:
           enabled: false
   application:
     name: notification-service
-  cloud:
-    nacos:
-      discovery:
-        server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DB:claimpaws_notification}?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
     username: ${MYSQL_USER}
