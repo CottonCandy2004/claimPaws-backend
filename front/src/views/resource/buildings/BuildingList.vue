@@ -65,7 +65,7 @@ function search() { resetPage(); fetchData() }
 function handleCreate() { editingId.value = null; form.value = { name: '', campusId: undefined }; dialogVisible.value = true }
 function handleEdit(row: any) {
   editingId.value = row.id
-  form.value = { name: row.name, campusId: row.campusId }
+  form.value = { name: row.name, campusId: campuses.value.find((c: any) => c.name === row.campusName)?.id ?? undefined }
   dialogVisible.value = true
 }
 async function handleSubmit() {

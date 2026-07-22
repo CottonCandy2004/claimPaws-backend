@@ -71,7 +71,7 @@ function search() { resetPage(); fetchData() }
 function handleCreate() { editingId.value = null; form.value = { name: '', buildingId: undefined, sort: 0 }; dialogVisible.value = true }
 function handleEdit(row: any) {
   editingId.value = row.id
-  form.value = { name: row.name, buildingId: row.buildingId, sort: row.sort || 0 }
+  form.value = { name: row.name, buildingId: buildings.value.find((b: any) => b.name === row.buildingName)?.id ?? undefined, sort: row.sort || 0 }
   dialogVisible.value = true
 }
 async function handleSubmit() {

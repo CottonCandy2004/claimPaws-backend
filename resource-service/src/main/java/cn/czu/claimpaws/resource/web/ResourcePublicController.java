@@ -199,17 +199,10 @@ public class ResourcePublicController {
             if ("CAMPUS".equals(type)) m.put("address", r.description());
             if ("BUILDING".equals(type)) {
                 m.put("campusName", r.building());
-                m.put("campusId", resourceMapper.findIdByNameAndType(r.building(), "CAMPUS"));
                 m.put("floorCount", resourceMapper.countByBuildingName(r.name()));
             }
-            if ("FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type)) {
-                m.put("buildingName", r.building());
-                m.put("buildingId", resourceMapper.findIdByNameAndType(r.building(), "BUILDING"));
-            }
-            if ("ROOM".equals(type) || "WORKSTATION".equals(type)) {
-                m.put("floorName", r.floor());
-                m.put("floorId", resourceMapper.findIdByNameAndType(r.floor(), "FLOOR"));
-            }
+            if ("FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("buildingName", r.building());
+            if ("ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("floorName", r.floor());
             if ("FLOOR".equals(type)) {
                 String s = r.description();
                 m.put("sort", s != null && !s.isEmpty() ? Integer.parseInt(s) : 0);
