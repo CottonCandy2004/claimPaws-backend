@@ -70,8 +70,21 @@ public class PolicyController {
 
     @PostMapping
     public ApiResponse<ReservationPolicy> create(
-            @RequestBody ReservationPolicy policy,
+            @RequestBody Map<String, Object> body,
             @RequestHeader("X-Request-Id") String requestId) {
+        ReservationPolicy policy = new ReservationPolicy(
+                null,
+                body.get("resourceId") != null ? Long.valueOf(body.get("resourceId").toString()) : 0L,
+                body.get("timeSlotGranularity") != null ? Integer.valueOf(body.get("timeSlotGranularity").toString()) : 30,
+                body.get("advanceBookingDays") != null ? Integer.valueOf(body.get("advanceBookingDays").toString()) : 7,
+                body.get("minDuration") != null ? Integer.valueOf(body.get("minDuration").toString()) : 30,
+                body.get("maxDuration") != null ? Integer.valueOf(body.get("maxDuration").toString()) : 240,
+                body.get("cancelDeadline") != null ? Integer.valueOf(body.get("cancelDeadline").toString()) : 60,
+                body.get("checkInWindow") != null ? Integer.valueOf(body.get("checkInWindow").toString()) : 15,
+                body.get("approvalLevel") != null && Integer.valueOf(body.get("approvalLevel").toString()) > 0,
+                body.get("approvalLevel") != null ? Integer.valueOf(body.get("approvalLevel").toString()) : 0,
+                true, null, null, null
+        );
         policyMapper.insert(policy);
         return ApiResponse.success(policy, requestId);
     }
