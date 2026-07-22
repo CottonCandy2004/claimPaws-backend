@@ -232,7 +232,8 @@ public class ResourcePublicController {
                 existing.type(),
                 (String) body.getOrDefault("floor", existing.floor()),
                 (String) body.getOrDefault("building", existing.building()),
-                body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : existing.capacity(),
+                body.get("capacity") != null ? ((Number) body.get("capacity")).intValue()
+                        : (existing.capacity() != null ? existing.capacity() : 0),
                 desc,
                 existing.active(), null, null, existing.deleted());
         resourceMapper.update(toUpdate);
