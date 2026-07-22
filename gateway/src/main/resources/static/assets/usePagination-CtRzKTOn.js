@@ -1,0 +1,1 @@
+import{h as n,i as c}from"./index-CxRbDq-P.js";function p(t=10){const e=c({page:1,size:t}),i=n(0),o=n(!1);function s(){e.page=1}function g(a){e.page=a}function r(a){e.size=a,e.page=1}return{pageParams:e,total:i,loading:o,resetPage:s,handlePageChange:g,handleSizeChange:r}}export{p as u};

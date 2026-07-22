@@ -114,7 +114,7 @@ const form = ref({
   name: '',   resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION',
   timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30,
   maxDuration: 240, cancelDeadline: 60, checkInWindow: 15,
-  noShowPenalty: 0, approvalLevel: 0 as number, approverRoles: ''
+  noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: ''
 })
 const rules: FormRules = { name: [{ required: true, message: '请输入策略名称', trigger: 'blur' }], resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }] }
 
@@ -139,13 +139,13 @@ async function fetchData() {
 function search() { resetPage(); fetchData() }
 function handleCreate() {
   editingId.value = null; selectedRoles.value = []
-  form.value = { name: '', resourceType: 'MEETING_ROOM', timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0, approverRoles: '' }
+  form.value = { name: '', resourceType: 'MEETING_ROOM', timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
   dialogVisible.value = true
 }
 function handleEdit(row: any) {
   editingId.value = row.id
   selectedRoles.value = row.approverRoles ? row.approverRoles.split(',').map((id: string) => allRoles.value.find((r: any) => r.id === Number(id))).filter(Boolean) : []
-  Object.assign(form.value, { ...row, approvalLevel: row.approvalLevel ?? 0, approverRoles: row.approverRoles || '' })
+  Object.assign(form.value, { ...row, approvalLevel: (row.approvalLevel ?? 0) as 0 | 1 | 2, approverRoles: row.approverRoles || '' })
   dialogVisible.value = true
 }
 async function handleSubmit() {
