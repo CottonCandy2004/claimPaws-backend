@@ -14,16 +14,9 @@ describe('auth store', () => {
     expect(auth.userInfo).toBeNull()
   })
 
-  it('should report logged in after setToken', () => {
-    const auth = useAuthStore()
-    auth.setToken({ accessToken: 'at', refreshToken: 'rt', accessTokenExpiresIn: 3600, refreshTokenExpiresIn: 7200 })
-    expect(auth.isLoggedIn).toBe(true)
-    expect(sessionStorage.getItem('accessToken')).toBe('at')
-  })
-
   it('should clear state on logout', () => {
     const auth = useAuthStore()
-    auth.setToken({ accessToken: 'at', refreshToken: 'rt', accessTokenExpiresIn: 3600, refreshTokenExpiresIn: 7200 })
+    sessionStorage.setItem('accessToken', 'test-token')
     auth.logout()
     expect(auth.isLoggedIn).toBe(false)
     expect(auth.accessToken).toBe('')

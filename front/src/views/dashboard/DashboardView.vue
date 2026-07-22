@@ -22,7 +22,7 @@
         <el-card shadow="hover">
           <template #header>欢迎</template>
           <p>你好，{{ auth.userInfo?.displayName || auth.userInfo?.username }}！</p>
-          <p>当前角色：{{ auth.userInfo?.roles?.map(r => r.name).join('、') || '无' }}</p>
+          <p>当前角色：{{ auth.userInfo?.roles?.join('、') || '无' }}</p>
         </el-card>
       </el-col>
     </el-row>
