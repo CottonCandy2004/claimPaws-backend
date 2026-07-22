@@ -242,7 +242,6 @@ public class ResourcePublicController {
                 }
             }
             case "FACILITY" -> floor = (String) body.getOrDefault("type", "");
-            }
         }
         String desc = "CAMPUS".equals(type) ? (String) body.getOrDefault("address", "")
                 : "FLOOR".equals(type) ? String.valueOf(body.getOrDefault("sort", 0))
