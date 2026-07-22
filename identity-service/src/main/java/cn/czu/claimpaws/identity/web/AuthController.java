@@ -34,8 +34,7 @@ public class AuthController {
             String token = authService.login(body.get("username"), body.get("password"));
             return ResponseEntity.ok(ApiResponse.success(Map.of("accessToken", token), requestId));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401)
-                    .body(ApiResponse.failure("AUTH_FAILED", e.getMessage(), requestId));
+            return ResponseEntity.ok(ApiResponse.failure("AUTH_FAILED", e.getMessage(), requestId));
         }
     }
 
