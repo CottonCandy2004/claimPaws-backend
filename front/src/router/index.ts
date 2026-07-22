@@ -40,7 +40,10 @@ const router = createRouter({ history: createWebHistory(), routes })
 
 router.beforeEach(async (to, _from, next) => {
   const auth = useAuthStore()
-  if (to.meta.requiresAuth === false) { next(auth.isLoggedIn && to.path === '/login' ? '/dashboard' : undefined); return }
+  if (to.meta.requiresAuth === false) {
+    if (auth.isLoggedIn && to.path === '/login') { next('/dashboard') } else { next() }
+    return
+  }
   if (!auth.isLoggedIn) { next('/login'); return }
   if (!auth.userInfo) {
     try { await auth.fetchUserInfo() } catch { auth.logout(); next('/login'); return }
