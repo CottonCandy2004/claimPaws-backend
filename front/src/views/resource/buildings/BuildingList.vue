@@ -64,9 +64,8 @@ async function loadCampuses() { campuses.value = await resourceApi.getAllCampuse
 function search() { resetPage(); fetchData() }
 function handleCreate() { editingId.value = null; form.value = { name: '', campusId: undefined }; dialogVisible.value = true }
 function handleEdit(row: any) {
-  const campus = campuses.value.find((c: any) => c.name === row.campusName)
   editingId.value = row.id
-  form.value = { name: row.name, campusId: campus?.id }
+  form.value = { name: row.name, campusId: row.campusId }
   dialogVisible.value = true
 }
 async function handleSubmit() {

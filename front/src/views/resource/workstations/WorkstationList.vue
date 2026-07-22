@@ -72,9 +72,8 @@ async function loadFloors() {
 function search() { resetPage(); fetchData() }
 function handleCreate() { editingId.value = null; form.value = { name: '', floorId: undefined }; dialogVisible.value = true }
 function handleEdit(row: any) {
-  const floor = floors.value.find((f: any) => f.name === row.floorName)
   editingId.value = row.id
-  form.value = { name: row.name, floorId: floor?.id }
+  form.value = { name: row.name, floorId: row.floorId }
   dialogVisible.value = true
 }
 async function handleSubmit() {

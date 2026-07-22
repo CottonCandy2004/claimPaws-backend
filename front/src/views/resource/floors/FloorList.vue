@@ -70,9 +70,8 @@ async function loadBuildings() {
 function search() { resetPage(); fetchData() }
 function handleCreate() { editingId.value = null; form.value = { name: '', buildingId: undefined, sort: 0 }; dialogVisible.value = true }
 function handleEdit(row: any) {
-  const building = buildings.value.find((b: any) => b.name === row.buildingName)
   editingId.value = row.id
-  form.value = { name: row.name, buildingId: building?.id, sort: row.sort || 0 }
+  form.value = { name: row.name, buildingId: row.buildingId, sort: row.sort || 0 }
   dialogVisible.value = true
 }
 async function handleSubmit() {

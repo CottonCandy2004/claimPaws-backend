@@ -15,6 +15,7 @@ public interface ResourceMapper {
 
     long count(@Param("type") String type, @Param("parentId") Long parentId, @Param("keyword") String keyword);
     long countByBuildingName(@Param("buildingName") String buildingName);
+    Long findIdByNameAndType(@Param("name") String name, @Param("type") String type);
 
     List<Resource> findAllByType(@Param("type") String type);
 

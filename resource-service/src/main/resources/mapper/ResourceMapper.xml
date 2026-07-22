@@ -109,4 +109,10 @@
         WHERE type = 'FLOOR' AND deleted = FALSE AND building = #{buildingName}
     </select>
 
+    <select id="findIdByNameAndType" resultType="java.lang.Long">
+        SELECT id FROM resources
+        WHERE name = #{name} AND type = #{type} AND deleted = FALSE
+        LIMIT 1
+    </select>
+
 </mapper>
