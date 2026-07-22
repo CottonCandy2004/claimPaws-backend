@@ -203,7 +203,10 @@ public class ResourcePublicController {
             }
             if ("FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("buildingName", r.building());
             if ("ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("floorName", r.floor());
-            if ("FLOOR".equals(type)) m.put("sort", r.description() != null ? Integer.parseInt(r.description()) : 0);
+            if ("FLOOR".equals(type)) {
+                String s = r.description();
+                m.put("sort", s != null && !s.isEmpty() ? Integer.parseInt(s) : 0);
+            }
             return m;
         }).toList();
         Map<String, Object> data = new HashMap<>();
