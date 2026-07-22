@@ -29,7 +29,7 @@ public interface ReservationMapper {
                                @Param("userId") Long userId, @Param("status") String status,
                                @Param("keyword") String keyword);
 
-    long count(@Param("userId") Long userId, @Param("status") String status,
+    long countFiltered(@Param("userId") Long userId, @Param("status") String status,
                @Param("keyword") String keyword);
 
     List<Reservation> findPendingApprovals(@Param("offset") int offset, @Param("limit") int limit);

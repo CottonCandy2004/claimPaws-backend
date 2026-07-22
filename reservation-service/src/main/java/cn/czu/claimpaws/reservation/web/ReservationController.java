@@ -38,7 +38,7 @@ public class ReservationController {
             @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
         int offset = (page - 1) * size;
         List<Reservation> reservations = reservationMapper.findPage(offset, size, userId, status, keyword);
-        long total = reservationMapper.count(userId, status, keyword);
+        long total = reservationMapper.countFiltered(userId, status, keyword);
         List<ReservationView> views = reservations.stream().map(r -> ReservationView.from(r, 0)).toList();
         return ApiResponse.success(new PageResponse<>(views, page, size, total), requestId);
     }
