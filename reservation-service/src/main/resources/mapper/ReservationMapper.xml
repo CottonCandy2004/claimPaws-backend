@@ -44,4 +44,53 @@
         FROM reservations
         WHERE id = #{id} AND deleted = FALSE
     </select>
+
+    <select id="findById" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
+        SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
+               resource_type AS resourceType, start_at AS startAt, end_at AS endAt,
+               status, approval_level AS approvalLevel, created_at AS createdAt, updated_at AS updatedAt
+        FROM reservations
+        WHERE id = #{id} AND deleted = FALSE
+    </select>
+
+    <select id="findPage" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
+        SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
+               resource_type AS resourceType, start_at AS startAt, end_at AS endAt,
+               status, approval_level AS approvalLevel, created_at AS createdAt, updated_at AS updatedAt
+        FROM reservations
+        WHERE deleted = FALSE
+        <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        <if test="keyword != null and keyword != ''">AND resource_name LIKE CONCAT('%', #{keyword}, '%')</if>
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM reservations
+        WHERE deleted = FALSE
+        <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        <if test="keyword != null and keyword != ''">AND resource_name LIKE CONCAT('%', #{keyword}, '%')</if>
+    </select>
+
+    <select id="findPendingApprovals" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
+        SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
+               resource_type AS resourceType, start_at AS startAt, end_at AS endAt,
+               status, approval_level AS approvalLevel, created_at AS createdAt, updated_at AS updatedAt
+        FROM reservations
+        WHERE status = 'PENDING_APPROVAL' AND deleted = FALSE
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countPendingApprovals" resultType="long">
+        SELECT COUNT(*) FROM reservations WHERE status = 'PENDING_APPROVAL' AND deleted = FALSE
+    </select>
+
+    <update id="updateStatus">
+        UPDATE reservations
+        SET status = #{status}, updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
 </mapper>

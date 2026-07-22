@@ -4,6 +4,7 @@ import cn.czu.claimpaws.reservation.domain.Reservation;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.Instant;
+import java.util.List;
 
 public interface ReservationMapper {
     boolean existsOverlap(
@@ -21,4 +22,19 @@ public interface ReservationMapper {
     long count();
 
     Reservation requireById(@Param("id") long id);
+
+    Reservation findById(@Param("id") long id);
+
+    List<Reservation> findPage(@Param("offset") int offset, @Param("limit") int limit,
+                               @Param("userId") Long userId, @Param("status") String status,
+                               @Param("keyword") String keyword);
+
+    long count(@Param("userId") Long userId, @Param("status") String status,
+               @Param("keyword") String keyword);
+
+    List<Reservation> findPendingApprovals(@Param("offset") int offset, @Param("limit") int limit);
+
+    long countPendingApprovals();
+
+    int updateStatus(@Param("id") long id, @Param("status") String status);
 }
