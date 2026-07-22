@@ -2,28 +2,21 @@ package cn.czu.claimpaws.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.RouterFunctions;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
-import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import org.springframework.web.server.WebFilter;
 
 @Configuration
 public class WebFluxConfig {
 
     @Bean
-    public RouterFunction<ServerResponse> staticResourceRouter() {
-        return RouterFunctions
-                .resources("/**", new ClassPathResource("static/"))
-                .andOther(route()
-                        .GET(request -> {
-                            String path = request.requestPath().value();
-                            return !path.startsWith("/api/");
-                        }, request -> ServerResponse.ok()
-                                .contentType(MediaType.TEXT_HTML)
-                                .bodyValue(new ClassPathResource("static/index.html")))
+    public WebFilter spaFallbackFilter() {
+        return (exchange, chain) -> {
+            String path = exchange.getRequest().getURI().getPath();
+            if (!path.startsWith("/api/") && !path.contains(".")) {
+                return chain.filter(exchange.mutate()
+                        .request(r -> r.path("/index.html").contextPath(""))
                         .build());
+            }
+            return chain.filter(exchange);
+        };
     }
 }
