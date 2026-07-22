@@ -51,4 +51,28 @@
             response_status = #{responseStatus}, failure_reason = #{failureReason}, claimed_at = NULL
         WHERE id = #{id} AND status = 'PROCESSING' AND deleted = FALSE
     </update>
+
+    <select id="findAuditPage" resultType="java.util.HashMap">
+        SELECT d.id, d.webhook_config_id AS webhookId, d.event_id AS eventId, d.event_type AS eventType,
+               d.status, d.retry_count AS retryCount, d.created_at AS createdAt,
+               d.response_status AS responseStatus, d.failure_reason AS failureReason
+        FROM notification_deliveries d
+        WHERE d.deleted = FALSE
+        <if test="webhookId != null">AND d.webhook_config_id = #{webhookId}</if>
+        <if test="status != null and status != ''">AND d.status = #{status}</if>
+        ORDER BY d.created_at DESC LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAudits" resultType="long">
+        SELECT COUNT(1) FROM notification_deliveries d
+        WHERE d.deleted = FALSE
+        <if test="webhookId != null">AND d.webhook_config_id = #{webhookId}</if>
+        <if test="status != null and status != ''">AND d.status = #{status}</if>
+    </select>
+
+    <update id="resetForRetry">
+        UPDATE notification_deliveries SET status = 'RETRY', retry_count = 0,
+            next_attempt_at = UTC_TIMESTAMP(), claimed_at = NULL
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
 </mapper>

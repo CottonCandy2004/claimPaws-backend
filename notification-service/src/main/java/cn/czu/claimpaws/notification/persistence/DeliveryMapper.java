@@ -4,6 +4,7 @@ import cn.czu.claimpaws.notification.domain.NotificationDelivery;
 import cn.czu.claimpaws.notification.domain.WebhookDeliveryTask;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 
 public interface DeliveryMapper {
@@ -27,4 +28,11 @@ public interface DeliveryMapper {
     void markFailed(@Param("id") long id, @Param("retryCount") int retryCount,
                     @Param("attemptedAt") LocalDateTime attemptedAt, @Param("responseStatus") Integer responseStatus,
                     @Param("failureReason") String failureReason);
+
+    List<Map<String, Object>> findAuditPage(@Param("offset") int offset, @Param("limit") int limit,
+                                            @Param("webhookId") Long webhookId, @Param("status") String status);
+
+    long countAudits(@Param("webhookId") Long webhookId, @Param("status") String status);
+
+    int resetForRetry(@Param("id") long id);
 }

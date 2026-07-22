@@ -31,7 +31,7 @@ public class WebhookEndpointService {
         if (secret == null || secret.isBlank()) {
             throw new IllegalArgumentException("Webhook endpoint must be HTTPS and secret is required");
         }
-        webhookConfigMapper.insert(endpoint.toString(), secretCipher.encrypt(secret));
+        webhookConfigMapper.insert(endpoint.toString(), secretCipher.encrypt(secret), true);
     }
 
     /**

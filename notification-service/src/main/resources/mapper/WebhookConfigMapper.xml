@@ -6,8 +6,32 @@
         SELECT id, endpoint_url, encrypted_secret, enabled
         FROM webhook_configs WHERE enabled = TRUE AND deleted = FALSE ORDER BY id
     </select>
+
     <insert id="insert">
         INSERT INTO webhook_configs(endpoint_url, encrypted_secret, enabled, deleted)
-        VALUES(#{endpointUrl}, #{encryptedSecret}, TRUE, FALSE)
+        VALUES(#{endpointUrl}, #{encryptedSecret}, #{enabled}, FALSE)
     </insert>
+
+    <select id="findPage" resultType="cn.czu.claimpaws.notification.domain.WebhookConfig">
+        SELECT id, endpoint_url, encrypted_secret, enabled
+        FROM webhook_configs WHERE deleted = FALSE ORDER BY id LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1) FROM webhook_configs WHERE deleted = FALSE
+    </select>
+
+    <select id="findById" resultType="cn.czu.claimpaws.notification.domain.WebhookConfig">
+        SELECT id, endpoint_url, encrypted_secret, enabled
+        FROM webhook_configs WHERE id = #{id} AND deleted = FALSE
+    </select>
+
+    <update id="update">
+        UPDATE webhook_configs SET endpoint_url = #{endpointUrl}, encrypted_secret = #{encryptedSecret},
+            enabled = #{enabled} WHERE id = #{id} AND deleted = FALSE
+    </update>
+
+    <update id="deleteById">
+        UPDATE webhook_configs SET deleted = TRUE WHERE id = #{id} AND deleted = FALSE
+    </update>
 </mapper>
