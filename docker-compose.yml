@@ -77,6 +77,7 @@ services:
       NACOS_NAMESPACE: ${NACOS_NAMESPACE:-}
       MYSQL_USER: ${MYSQL_USER:-claimpaws}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+      MYSQL_HOST: ${MYSQL_HOST:-mysql}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-me-32-bytes}
@@ -101,6 +102,7 @@ services:
       NACOS_NAMESPACE: ${NACOS_NAMESPACE:-}
       MYSQL_USER: ${MYSQL_USER:-claimpaws}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+      MYSQL_HOST: ${MYSQL_HOST:-mysql}
     ports:
       - "127.0.0.1:8082:8082"
     networks:
@@ -120,10 +122,12 @@ services:
       NACOS_NAMESPACE: ${NACOS_NAMESPACE:-}
       MYSQL_USER: ${MYSQL_USER:-claimpaws}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+      MYSQL_HOST: ${MYSQL_HOST:-mysql}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-claimpaws}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-local-dev-only}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
     ports:
       - "127.0.0.1:8083:8083"
     networks:
@@ -147,8 +151,10 @@ services:
       NACOS_NAMESPACE: ${NACOS_NAMESPACE:-}
       MYSQL_USER: ${MYSQL_USER:-claimpaws}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-dev-only}
+      MYSQL_HOST: ${MYSQL_HOST:-mysql}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-claimpaws}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-local-dev-only}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
       WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY:-MDEyMzQ1Njc4OWFiY2RlZg==}
     ports:
       - "127.0.0.1:8084:8084"
