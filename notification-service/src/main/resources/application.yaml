@@ -3,7 +3,6 @@ server:
 spring:
   application:
     name: notification-service
-  config:
   cloud:
     nacos:
       discovery:

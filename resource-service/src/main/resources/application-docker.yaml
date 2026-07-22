@@ -2,18 +2,12 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: "optional:nacos:${spring.application.name}.yaml?server-addr=${NACOS_SERVER_ADDR:nacos:8848}"
   cloud:
     nacos:
-      server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
       discovery:
         server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
-      config:
-        server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
-        namespace: ${NACOS_NAMESPACE:}
-        file-extension: yaml
   datasource:
-    url: jdbc:mysql://mysql:3306/claimpaws_resource?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/claimpaws_resource?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8
     username: ${MYSQL_USER:claimpaws}
     password: ${MYSQL_PASSWORD:local-dev-only}
   flyway:

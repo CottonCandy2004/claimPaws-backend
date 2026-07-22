@@ -4,7 +4,6 @@ server:
 spring:
   application:
     name: resource-service
-  config:
   cloud:
     nacos:
       discovery:

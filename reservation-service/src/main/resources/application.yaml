@@ -3,7 +3,6 @@ server:
 spring:
   application:
     name: reservation-service
-  config:
   cloud:
     nacos:
       discovery:
