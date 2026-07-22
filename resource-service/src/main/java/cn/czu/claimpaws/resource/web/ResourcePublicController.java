@@ -184,6 +184,13 @@ public class ResourcePublicController {
         int offset = (page - 1) * size;
         List<Resource> records = resourceMapper.findPage(type, parentId, offset, size, keyword);
         long total = resourceMapper.count(type, parentId, keyword);
+        if ("FLOOR".equals(type)) {
+            records.sort((a, b) -> {
+                int sa = a.description() != null ? Integer.parseInt(a.description()) : 0;
+                int sb = b.description() != null ? Integer.parseInt(b.description()) : 0;
+                return Integer.compare(sa, sb);
+            });
+        }
         List<Map<String, Object>> mapped = records.stream().map(r -> {
             Map<String, Object> m = new HashMap<>();
             m.put("id", r.id());
@@ -219,15 +226,26 @@ public class ResourcePublicController {
 
     private ApiResponse<Resource> createResource(String type, Map<String, Object> body, String requestId) {
         String name = (String) body.getOrDefault("name", "");
-        String building = resolveParentName(type, body);
-        String floor = "FLOOR".equals(type) ? resolveParentName(type, body) : "";
+        String parentName = resolveParentName(type, body);
+        String building = "";
+        String floor = "";
+        switch (type) {
+            case "BUILDING" -> building = parentName; // campus name → building field
+            case "FLOOR" -> { building = parentName; floor = parentName; } // building name → building field
+            case "ROOM", "WORKSTATION" -> {
+                floor = parentName; // floor name → floor field
+                if (body.get("floorId") != null) {
+                    Long floorId = Long.valueOf(body.get("floorId").toString());
+                    Resource floorRes = resourceMapper.findById(floorId);
+                    if (floorRes != null) building = floorRes.building(); // building name → building field
+                }
+            }
+        }
         String desc = "CAMPUS".equals(type) ? (String) body.getOrDefault("address", "")
                 : "FLOOR".equals(type) ? String.valueOf(body.getOrDefault("sort", 0))
                 : (String) body.getOrDefault("description", "");
         Integer capacity = body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : null;
-        Resource resource = new Resource(null, name, type,
-                "FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type) ? floor : "",
-                !"CAMPUS".equals(type) ? building : "",
+        Resource resource = new Resource(null, name, type, floor, building,
                 capacity, desc, true, null, null, false);
         resourceMapper.insert(resource);
         return ApiResponse.success(resource, requestId);
@@ -251,8 +269,16 @@ public class ResourcePublicController {
     private ApiResponse<Resource> updateResource(long id, Map<String, Object> body, String requestId) {
         Resource existing = resourceMapper.findById(id);
         if (existing == null) return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
-        String building = resolveParentName(existing.type(), body);
-        if ("CAMPUS".equals(existing.type())) building = "";
+        String parentName = !"CAMPUS".equals(existing.type()) ? resolveParentName(existing.type(), body) : "";
+        String building = !parentName.isEmpty() && !"ROOM".equals(existing.type()) && !"WORKSTATION".equals(existing.type())
+                ? parentName : existing.building();
+        String floor = ("FLOOR".equals(existing.type()) || "ROOM".equals(existing.type()) || "WORKSTATION".equals(existing.type()))
+                ? (parentName.isEmpty() ? existing.floor() : parentName) : existing.floor();
+        if (body.containsKey("floorId") && body.get("floorId") != null) {
+            Long floorId = Long.valueOf(body.get("floorId").toString());
+            Resource floorRes = resourceMapper.findById(floorId);
+            if (floorRes != null) building = floorRes.building();
+        }
         String desc = "CAMPUS".equals(existing.type()) && body.containsKey("address")
                 ? (String) body.getOrDefault("address", existing.description())
                 : "FLOOR".equals(existing.type()) && body.containsKey("sort")
@@ -261,8 +287,8 @@ public class ResourcePublicController {
         Resource toUpdate = new Resource(id,
                 (String) body.getOrDefault("name", existing.name()),
                 existing.type(),
-                (String) body.getOrDefault("floor", existing.floor()),
-                !building.isEmpty() ? building : existing.building(),
+                floor,
+                building,
                 body.get("capacity") != null ? ((Number) body.get("capacity")).intValue()
                         : (existing.capacity() != null ? existing.capacity() : 0),
                 desc,
