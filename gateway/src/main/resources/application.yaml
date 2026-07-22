@@ -1,6 +1,9 @@
 server:
   port: 8080
+
 spring:
+  application:
+    name: gateway
   cloud:
     nacos:
       discovery:
@@ -9,15 +12,24 @@ spring:
         import-check:
           enabled: false
     gateway:
-      server:
-        webflux:
-          routes:
-          - id: identity
-            uri: lb://identity-service
-            predicates:
-            - Path=/api/v1/auth/**
-  application:
-    name: gateway
+      routes:
+        - id: identity
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/v1/auth/**,/api/v1/users/**,/api/v1/roles/**,/api/v1/departments/**
+        - id: resource
+          uri: lb://resource-service
+          predicates:
+            - Path=/api/v1/resources/**,/api/v1/policies/**
+        - id: reservation
+          uri: lb://reservation-service
+          predicates:
+            - Path=/api/v1/reservations/**,/api/v1/approvals/**
+        - id: notification
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/webhooks/**
+
 management:
   endpoints:
     web:
