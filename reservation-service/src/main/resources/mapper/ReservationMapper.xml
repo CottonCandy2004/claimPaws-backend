@@ -67,6 +67,12 @@
     </select>
 
     <select id="countFiltered" resultType="long">
+        SELECT COUNT(*) FROM reservations
+        WHERE deleted = FALSE
+        <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        <if test="keyword != null and keyword != ''">AND resource_name LIKE CONCAT('%', #{keyword}, '%')</if>
+    </select>
 
     <select id="findPendingApprovals" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
         SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
