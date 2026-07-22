@@ -18,8 +18,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchUserInfo() {
-    const info = await get<{ id: number; username: string; displayName: string; roles: string[] }>('/auth/me')
-    userInfo.value = info
+    const info = await get<{ id: number; username: string; displayName: string; roles: string[]; permissions: string[] }>('/auth/me')
+    userInfo.value = { id: info.id, username: info.username, displayName: info.displayName, roles: info.roles }
+    permissions.value = info.permissions || []
   }
 
   function hasPermission(perm: string): boolean { return permissions.value.includes(perm) }
