@@ -13,18 +13,38 @@ spring:
           enabled: false
     gateway:
       routes:
-        - id: identity
+        - id: identity-auth
           uri: lb://identity-service
           predicates:
-            - Path=/api/v1/auth/**,/api/v1/users/**,/api/v1/roles/**,/api/v1/departments/**
+            - Path=/api/v1/auth/**
+        - id: identity-users
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/v1/users/**
+        - id: identity-roles
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/v1/roles/**
+        - id: identity-depts
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/v1/departments/**
         - id: resource
           uri: lb://resource-service
           predicates:
-            - Path=/api/v1/resources/**,/api/v1/policies/**
+            - Path=/api/v1/resources/**
+        - id: policy
+          uri: lb://resource-service
+          predicates:
+            - Path=/api/v1/policies/**
         - id: reservation
           uri: lb://reservation-service
           predicates:
-            - Path=/api/v1/reservations/**,/api/v1/approvals/**
+            - Path=/api/v1/reservations/**
+        - id: approval
+          uri: lb://reservation-service
+          predicates:
+            - Path=/api/v1/approvals/**
         - id: notification
           uri: lb://notification-service
           predicates:
