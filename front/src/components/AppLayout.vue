@@ -10,19 +10,19 @@
 
         <el-sub-menu index="/resources">
           <template #title><el-icon><OfficeBuilding /></el-icon><span>资源管理</span></template>
-          <el-menu-item index="/resources/campus" v-if="auth.hasPermission('campus:read')">园区管理</el-menu-item>
-          <el-menu-item index="/resources/buildings" v-if="auth.hasPermission('building:read')">楼宇管理</el-menu-item>
-          <el-menu-item index="/resources/floors" v-if="auth.hasPermission('floor:read')">楼层管理</el-menu-item>
-          <el-menu-item index="/resources/rooms" v-if="auth.hasPermission('room:read')">会议室管理</el-menu-item>
-          <el-menu-item index="/resources/workstations" v-if="auth.hasPermission('workstation:read')">工位管理</el-menu-item>
-          <el-menu-item index="/resources/facilities" v-if="auth.hasPermission('facility:read')">设施管理</el-menu-item>
-          <el-menu-item index="/resources/policies" v-if="auth.hasPermission('policy:read')">预约策略</el-menu-item>
+          <el-menu-item index="/resources/campus">园区管理</el-menu-item>
+          <el-menu-item index="/resources/buildings">楼宇管理</el-menu-item>
+          <el-menu-item index="/resources/floors">楼层管理</el-menu-item>
+          <el-menu-item index="/resources/rooms">会议室管理</el-menu-item>
+          <el-menu-item index="/resources/workstations">工位管理</el-menu-item>
+          <el-menu-item index="/resources/facilities">设施管理</el-menu-item>
+          <el-menu-item index="/resources/policies">预约策略</el-menu-item>
         </el-sub-menu>
 
         <el-menu-item index="/reservations"><el-icon><Calendar /></el-icon><span>我的预约</span></el-menu-item>
         <el-menu-item index="/approvals"><el-icon><Checked /></el-icon><span>待审批</span></el-menu-item>
 
-        <el-sub-menu index="/notifications" v-if="auth.hasPermission('webhook:read')">
+        <el-sub-menu index="/notifications">
           <template #title><el-icon><Bell /></el-icon><span>通知管理</span></template>
           <el-menu-item index="/notifications">Webhook 配置</el-menu-item>
           <el-menu-item index="/notifications/audit">投递审计</el-menu-item>
@@ -30,9 +30,9 @@
 
         <el-sub-menu index="/system">
           <template #title><el-icon><Setting /></el-icon><span>系统管理</span></template>
-          <el-menu-item index="/system/users" v-if="auth.hasPermission('user:read')">用户管理</el-menu-item>
-          <el-menu-item index="/system/roles" v-if="auth.hasPermission('role:read')">角色管理</el-menu-item>
-          <el-menu-item index="/system/departments" v-if="auth.hasPermission('department:read')">部门管理</el-menu-item>
+          <el-menu-item index="/system/users">用户管理</el-menu-item>
+          <el-menu-item index="/system/roles">角色管理</el-menu-item>
+          <el-menu-item index="/system/departments">部门管理</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
