@@ -2,7 +2,7 @@ spring:
   config:
     activate:
       on-profile: docker
-    import: "optional:nacos:${spring.application.name}"
+    import: "optional:nacos:${spring.application.name}.yaml?server-addr=${NACOS_SERVER_ADDR:nacos:8848}"
   cloud:
     nacos:
       server-addr: ${NACOS_SERVER_ADDR:nacos:8848}
