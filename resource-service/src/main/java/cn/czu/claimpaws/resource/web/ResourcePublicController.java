@@ -184,8 +184,26 @@ public class ResourcePublicController {
         int offset = (page - 1) * size;
         List<Resource> records = resourceMapper.findPage(type, parentId, offset, size, keyword);
         long total = resourceMapper.count(type, parentId, keyword);
+        List<Map<String, Object>> mapped = records.stream().map(r -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", r.id());
+            m.put("name", r.name());
+            m.put("type", r.type());
+            m.put("floor", r.floor());
+            m.put("building", r.building());
+            m.put("capacity", r.capacity());
+            m.put("description", r.description());
+            m.put("active", r.active());
+            m.put("createdAt", r.createdAt() != null ? r.createdAt().toString() : null);
+            m.put("updatedAt", r.updatedAt() != null ? r.updatedAt().toString() : null);
+            if ("CAMPUS".equals(type)) m.put("address", r.description());
+            if ("BUILDING".equals(type)) m.put("campusName", r.building());
+            if ("FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("buildingName", r.building());
+            if ("ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("floorName", r.floor());
+            return m;
+        }).toList();
         Map<String, Object> data = new HashMap<>();
-        data.put("records", records);
+        data.put("records", mapped);
         data.put("total", total);
         data.put("page", page);
         data.put("size", size);
@@ -194,12 +212,11 @@ public class ResourcePublicController {
 
     private ApiResponse<Resource> createResource(String type, Map<String, Object> body, String requestId) {
         String name = (String) body.getOrDefault("name", "");
-        String address = (String) body.getOrDefault("address", "");
+        String desc = "CAMPUS".equals(type) ? (String) body.getOrDefault("address", "") : (String) body.getOrDefault("description", "");
         String floor = (String) body.getOrDefault("floor", "");
         String building = (String) body.getOrDefault("building", "");
         Integer capacity = body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : null;
-        String description = (String) body.getOrDefault("description", "");
-        Resource resource = new Resource(null, name, type, floor, building, capacity, description, true, null, null, false);
+        Resource resource = new Resource(null, name, type, floor, building, capacity, desc, true, null, null, false);
         resourceMapper.insert(resource);
         return ApiResponse.success(resource, requestId);
     }
@@ -207,11 +224,20 @@ public class ResourcePublicController {
     private ApiResponse<Resource> updateResource(long id, Map<String, Object> body, String requestId) {
         Resource existing = resourceMapper.findById(id);
         if (existing == null) return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
+        String desc = "CAMPUS".equals(existing.type()) && body.containsKey("address")
+                ? (String) body.getOrDefault("address", existing.description())
+                : (String) body.getOrDefault("description", existing.description());
         Resource toUpdate = new Resource(id,
                 (String) body.getOrDefault("name", existing.name()),
                 existing.type(),
                 (String) body.getOrDefault("floor", existing.floor()),
                 (String) body.getOrDefault("building", existing.building()),
+                body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : existing.capacity(),
+                desc,
+                existing.active(), null, null, existing.deleted());
+        resourceMapper.update(toUpdate);
+        return ApiResponse.success(resourceMapper.findById(id), requestId);
+    }
                 body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : existing.capacity(),
                 (String) body.getOrDefault("description", existing.description()),
                 existing.active(), null, null, existing.deleted());
