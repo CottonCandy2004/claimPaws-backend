@@ -33,4 +33,45 @@
         VALUES (#{username}, #{passwordHash}, #{displayName}, #{email}, #{phone}, #{departmentId}, #{enabled}, NOW(), NOW())
     </insert>
 
+    <select id="findPage" resultMap="userResultMap">
+        SELECT * FROM users
+        WHERE deleted = FALSE
+        <if test="keyword != null and keyword != ''">
+            AND (username LIKE CONCAT('%', #{keyword}, '%') OR display_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM users
+        WHERE deleted = FALSE
+        <if test="keyword != null and keyword != ''">
+            AND (username LIKE CONCAT('%', #{keyword}, '%') OR display_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <select id="findById" resultMap="userResultMap">
+        SELECT * FROM users
+        WHERE id = #{id} AND deleted = FALSE
+    </select>
+
+    <update id="update">
+        UPDATE users
+        <set>
+            <if test="displayName != null">display_name = #{displayName},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="departmentId != null">department_id = #{departmentId},</if>
+            <if test="enabled != null">enabled = #{enabled},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
+    <update id="deleteById">
+        UPDATE users SET deleted = TRUE, updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
 </mapper>

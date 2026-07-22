@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.czu.claimpaws.identity.persistence.DepartmentMapper">
+
+    <select id="findAll" resultType="cn.czu.claimpaws.identity.domain.Department">
+        SELECT * FROM departments WHERE deleted = FALSE ORDER BY id ASC
+    </select>
+
+    <select id="findById" resultType="cn.czu.claimpaws.identity.domain.Department">
+        SELECT * FROM departments WHERE id = #{id} AND deleted = FALSE
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO departments (name, parent_id, created_at, updated_at)
+        VALUES (#{name}, #{parentId}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE departments
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
+    <update id="deleteById">
+        UPDATE departments SET deleted = TRUE, updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
+</mapper>

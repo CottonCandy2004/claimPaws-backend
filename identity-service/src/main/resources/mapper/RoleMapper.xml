@@ -1,9 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.czu.claimpaws.identity.persistence.RoleMapper">
+
     <select id="findByUserId" resultType="cn.czu.claimpaws.identity.domain.Role">
         SELECT r.* FROM roles r
         JOIN user_roles ur ON r.id = ur.role_id
         WHERE ur.user_id = #{userId}
     </select>
+
+    <select id="findAll" resultType="cn.czu.claimpaws.identity.domain.Role">
+        SELECT * FROM roles WHERE deleted = FALSE ORDER BY id DESC
+    </select>
+
+    <select id="findById" resultType="cn.czu.claimpaws.identity.domain.Role">
+        SELECT * FROM roles WHERE id = #{id} AND deleted = FALSE
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO roles (name, description, created_at, updated_at)
+        VALUES (#{name}, #{description}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE roles
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
+    <update id="deleteById">
+        UPDATE roles SET deleted = TRUE, updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
 </mapper>

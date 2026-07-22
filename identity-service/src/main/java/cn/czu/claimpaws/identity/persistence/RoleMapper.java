@@ -10,4 +10,14 @@ import java.util.List;
 public interface RoleMapper {
 
     List<Role> findByUserId(@Param("userId") long userId);
+
+    List<Role> findAll();
+
+    Role findById(@Param("id") long id);
+
+    int insert(Role role);
+
+    int update(Role role);
+
+    int deleteById(@Param("id") long id);
 }
