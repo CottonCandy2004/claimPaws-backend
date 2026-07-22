@@ -197,7 +197,10 @@ public class ResourcePublicController {
             m.put("createdAt", r.createdAt() != null ? r.createdAt().toString() : null);
             m.put("updatedAt", r.updatedAt() != null ? r.updatedAt().toString() : null);
             if ("CAMPUS".equals(type)) m.put("address", r.description());
-            if ("BUILDING".equals(type)) m.put("campusName", r.building());
+            if ("BUILDING".equals(type)) {
+                m.put("campusName", r.building());
+                m.put("floorCount", resourceMapper.countByBuildingName(r.name()));
+            }
             if ("FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("buildingName", r.building());
             if ("ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("floorName", r.floor());
             return m;
@@ -212,18 +215,38 @@ public class ResourcePublicController {
 
     private ApiResponse<Resource> createResource(String type, Map<String, Object> body, String requestId) {
         String name = (String) body.getOrDefault("name", "");
+        String building = resolveParentName(type, body);
+        String floor = "FLOOR".equals(type) ? resolveParentName(type, body) : "";
         String desc = "CAMPUS".equals(type) ? (String) body.getOrDefault("address", "") : (String) body.getOrDefault("description", "");
-        String floor = (String) body.getOrDefault("floor", "");
-        String building = (String) body.getOrDefault("building", "");
         Integer capacity = body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : null;
-        Resource resource = new Resource(null, name, type, floor, building, capacity, desc, true, null, null, false);
+        Resource resource = new Resource(null, name, type,
+                "FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type) ? floor : "",
+                !"CAMPUS".equals(type) ? building : "",
+                capacity, desc, true, null, null, false);
         resourceMapper.insert(resource);
         return ApiResponse.success(resource, requestId);
+    }
+
+    private String resolveParentName(String type, Map<String, Object> body) {
+        String parentKey = switch (type) {
+            case "BUILDING" -> "campusId";
+            case "FLOOR" -> "buildingId";
+            case "ROOM", "WORKSTATION" -> "floorId";
+            default -> null;
+        };
+        if (parentKey != null && body.get(parentKey) != null) {
+            Long parentId = Long.valueOf(body.get(parentKey).toString());
+            Resource parent = resourceMapper.findById(parentId);
+            return parent != null ? parent.name() : "";
+        }
+        return (String) body.getOrDefault("building", "");
     }
 
     private ApiResponse<Resource> updateResource(long id, Map<String, Object> body, String requestId) {
         Resource existing = resourceMapper.findById(id);
         if (existing == null) return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
+        String building = resolveParentName(existing.type(), body);
+        if ("CAMPUS".equals(existing.type())) building = "";
         String desc = "CAMPUS".equals(existing.type()) && body.containsKey("address")
                 ? (String) body.getOrDefault("address", existing.description())
                 : (String) body.getOrDefault("description", existing.description());
@@ -231,7 +254,7 @@ public class ResourcePublicController {
                 (String) body.getOrDefault("name", existing.name()),
                 existing.type(),
                 (String) body.getOrDefault("floor", existing.floor()),
-                (String) body.getOrDefault("building", existing.building()),
+                !building.isEmpty() ? building : existing.building(),
                 body.get("capacity") != null ? ((Number) body.get("capacity")).intValue()
                         : (existing.capacity() != null ? existing.capacity() : 0),
                 desc,

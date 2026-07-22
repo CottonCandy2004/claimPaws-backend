@@ -104,4 +104,9 @@
         WHERE id = #{id} AND deleted = FALSE
     </update>
 
+    <select id="countByBuildingName" resultType="long">
+        SELECT COUNT(*) FROM resources
+        WHERE type = 'FLOOR' AND deleted = FALSE AND building = #{buildingName}
+    </select>
+
 </mapper>
