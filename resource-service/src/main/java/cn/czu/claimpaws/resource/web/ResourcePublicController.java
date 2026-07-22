@@ -203,6 +203,7 @@ public class ResourcePublicController {
             }
             if ("FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("buildingName", r.building());
             if ("ROOM".equals(type) || "WORKSTATION".equals(type)) m.put("floorName", r.floor());
+            if ("FLOOR".equals(type)) m.put("sort", r.description() != null ? Integer.parseInt(r.description()) : 0);
             return m;
         }).toList();
         Map<String, Object> data = new HashMap<>();
@@ -217,7 +218,9 @@ public class ResourcePublicController {
         String name = (String) body.getOrDefault("name", "");
         String building = resolveParentName(type, body);
         String floor = "FLOOR".equals(type) ? resolveParentName(type, body) : "";
-        String desc = "CAMPUS".equals(type) ? (String) body.getOrDefault("address", "") : (String) body.getOrDefault("description", "");
+        String desc = "CAMPUS".equals(type) ? (String) body.getOrDefault("address", "")
+                : "FLOOR".equals(type) ? String.valueOf(body.getOrDefault("sort", 0))
+                : (String) body.getOrDefault("description", "");
         Integer capacity = body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : null;
         Resource resource = new Resource(null, name, type,
                 "FLOOR".equals(type) || "ROOM".equals(type) || "WORKSTATION".equals(type) ? floor : "",
@@ -249,6 +252,8 @@ public class ResourcePublicController {
         if ("CAMPUS".equals(existing.type())) building = "";
         String desc = "CAMPUS".equals(existing.type()) && body.containsKey("address")
                 ? (String) body.getOrDefault("address", existing.description())
+                : "FLOOR".equals(existing.type()) && body.containsKey("sort")
+                ? String.valueOf(body.getOrDefault("sort", 0))
                 : (String) body.getOrDefault("description", existing.description());
         Resource toUpdate = new Resource(id,
                 (String) body.getOrDefault("name", existing.name()),
