@@ -43,7 +43,7 @@ public class ReservationController {
         return ApiResponse.success(new PageResponse<>(views, page, size, total), requestId);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ApiResponse<ReservationView> get(
             @PathVariable long id,
             @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
@@ -52,6 +52,18 @@ public class ReservationController {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
         return ApiResponse.success(ReservationView.from(reservation, 0), requestId);
+    }
+
+    @GetMapping("/pending-approvals")
+    public ApiResponse<PageResponse<ReservationView>> pendingApprovals(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
+        int offset = (page - 1) * size;
+        List<Reservation> reservations = reservationMapper.findPendingApprovals(offset, size);
+        long total = reservationMapper.countPendingApprovals();
+        List<ReservationView> views = reservations.stream().map(r -> ReservationView.from(r, 0)).toList();
+        return ApiResponse.success(new PageResponse<>(views, page, size, total), requestId);
     }
 
     @PostMapping

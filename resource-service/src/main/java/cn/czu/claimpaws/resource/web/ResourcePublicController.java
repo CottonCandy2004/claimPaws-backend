@@ -3,16 +3,7 @@ package cn.czu.claimpaws.resource.web;
 import cn.czu.claimpaws.common.api.ApiResponse;
 import cn.czu.claimpaws.resource.domain.Resource;
 import cn.czu.claimpaws.resource.persistence.ResourceMapper;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,167 +19,209 @@ public class ResourcePublicController {
         this.resourceMapper = resourceMapper;
     }
 
+    // ---- campus ----
     @GetMapping("/campus")
     public ApiResponse<Map<String, Object>> listCampus(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String keyword,
             @RequestHeader("X-Request-Id") String requestId) {
-        int offset = (page - 1) * size;
-        List<Resource> records = resourceMapper.findPage("CAMPUS", null, offset, size, keyword);
-        long total = resourceMapper.count("CAMPUS", null, keyword);
-        return buildPagedResponse(records, total, page, size, requestId);
+        return listByType("CAMPUS", null, page, size, keyword, requestId);
     }
 
     @GetMapping("/campus/all")
-    public ApiResponse<List<Resource>> allCampuses(
-            @RequestHeader("X-Request-Id") String requestId) {
+    public ApiResponse<List<Resource>> allCampuses(@RequestHeader("X-Request-Id") String requestId) {
         return ApiResponse.success(resourceMapper.findAllByType("CAMPUS"), requestId);
     }
 
+    @PostMapping("/campus")
+    public ApiResponse<Resource> createCampus(@RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return createResource("CAMPUS", body, requestId);
+    }
+
+    @PutMapping("/campus/{id}")
+    public ApiResponse<Resource> updateCampus(@PathVariable long id, @RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return updateResource(id, body, requestId);
+    }
+
+    @DeleteMapping("/campus/{id}")
+    public ApiResponse<Void> deleteCampus(@PathVariable long id, @RequestHeader("X-Request-Id") String requestId) {
+        return deleteResource(id, requestId);
+    }
+
+    // ---- buildings ----
     @GetMapping("/buildings")
     public ApiResponse<Map<String, Object>> listBuildings(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long campusId,
-            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long campusId, @RequestParam(defaultValue = "") String keyword,
             @RequestHeader("X-Request-Id") String requestId) {
-        int offset = (page - 1) * size;
-        List<Resource> records = resourceMapper.findPage("BUILDING", campusId, offset, size, keyword);
-        long total = resourceMapper.count("BUILDING", campusId, keyword);
-        return buildPagedResponse(records, total, page, size, requestId);
+        return listByType("BUILDING", campusId, page, size, keyword, requestId);
     }
 
     @GetMapping("/buildings/by-campus/{campusId}")
-    public ApiResponse<List<Resource>> buildingsByCampus(
-            @PathVariable long campusId,
-            @RequestHeader("X-Request-Id") String requestId) {
+    public ApiResponse<List<Resource>> buildingsByCampus(@PathVariable long campusId, @RequestHeader("X-Request-Id") String requestId) {
         return ApiResponse.success(resourceMapper.findByParentId(campusId, "BUILDING"), requestId);
     }
 
+    @PostMapping("/buildings")
+    public ApiResponse<Resource> createBuilding(@RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return createResource("BUILDING", body, requestId);
+    }
+
+    @PutMapping("/buildings/{id}")
+    public ApiResponse<Resource> updateBuilding(@PathVariable long id, @RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return updateResource(id, body, requestId);
+    }
+
+    @DeleteMapping("/buildings/{id}")
+    public ApiResponse<Void> deleteBuilding(@PathVariable long id, @RequestHeader("X-Request-Id") String requestId) {
+        return deleteResource(id, requestId);
+    }
+
+    // ---- floors ----
     @GetMapping("/floors")
     public ApiResponse<Map<String, Object>> listFloors(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long buildingId,
-            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long buildingId, @RequestParam(defaultValue = "") String keyword,
             @RequestHeader("X-Request-Id") String requestId) {
-        int offset = (page - 1) * size;
-        List<Resource> records = resourceMapper.findPage("FLOOR", buildingId, offset, size, keyword);
-        long total = resourceMapper.count("FLOOR", buildingId, keyword);
-        return buildPagedResponse(records, total, page, size, requestId);
+        return listByType("FLOOR", buildingId, page, size, keyword, requestId);
     }
 
     @GetMapping("/floors/by-building/{buildingId}")
-    public ApiResponse<List<Resource>> floorsByBuilding(
-            @PathVariable long buildingId,
-            @RequestHeader("X-Request-Id") String requestId) {
+    public ApiResponse<List<Resource>> floorsByBuilding(@PathVariable long buildingId, @RequestHeader("X-Request-Id") String requestId) {
         return ApiResponse.success(resourceMapper.findByParentId(buildingId, "FLOOR"), requestId);
     }
 
+    @PostMapping("/floors")
+    public ApiResponse<Resource> createFloor(@RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return createResource("FLOOR", body, requestId);
+    }
+
+    @PutMapping("/floors/{id}")
+    public ApiResponse<Resource> updateFloor(@PathVariable long id, @RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return updateResource(id, body, requestId);
+    }
+
+    @DeleteMapping("/floors/{id}")
+    public ApiResponse<Void> deleteFloor(@PathVariable long id, @RequestHeader("X-Request-Id") String requestId) {
+        return deleteResource(id, requestId);
+    }
+
+    // ---- rooms ----
     @GetMapping("/rooms")
     public ApiResponse<Map<String, Object>> listRooms(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long floorId,
-            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long floorId, @RequestParam(defaultValue = "") String keyword,
             @RequestHeader("X-Request-Id") String requestId) {
-        int offset = (page - 1) * size;
-        List<Resource> records = resourceMapper.findPage("ROOM", floorId, offset, size, keyword);
-        long total = resourceMapper.count("ROOM", floorId, keyword);
-        return buildPagedResponse(records, total, page, size, requestId);
+        return listByType("ROOM", floorId, page, size, keyword, requestId);
     }
 
+    @PostMapping("/rooms")
+    public ApiResponse<Resource> createRoom(@RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return createResource("ROOM", body, requestId);
+    }
+
+    @PutMapping("/rooms/{id}")
+    public ApiResponse<Resource> updateRoom(@PathVariable long id, @RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return updateResource(id, body, requestId);
+    }
+
+    @DeleteMapping("/rooms/{id}")
+    public ApiResponse<Void> deleteRoom(@PathVariable long id, @RequestHeader("X-Request-Id") String requestId) {
+        return deleteResource(id, requestId);
+    }
+
+    // ---- workstations ----
     @GetMapping("/workstations")
     public ApiResponse<Map<String, Object>> listWorkstations(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long floorId,
-            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long floorId, @RequestParam(defaultValue = "") String keyword,
             @RequestHeader("X-Request-Id") String requestId) {
-        int offset = (page - 1) * size;
-        List<Resource> records = resourceMapper.findPage("WORKSTATION", floorId, offset, size, keyword);
-        long total = resourceMapper.count("WORKSTATION", floorId, keyword);
-        return buildPagedResponse(records, total, page, size, requestId);
+        return listByType("WORKSTATION", floorId, page, size, keyword, requestId);
     }
 
+    @PostMapping("/workstations")
+    public ApiResponse<Resource> createWorkstation(@RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return createResource("WORKSTATION", body, requestId);
+    }
+
+    @PutMapping("/workstations/{id}")
+    public ApiResponse<Resource> updateWorkstation(@PathVariable long id, @RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return updateResource(id, body, requestId);
+    }
+
+    @DeleteMapping("/workstations/{id}")
+    public ApiResponse<Void> deleteWorkstation(@PathVariable long id, @RequestHeader("X-Request-Id") String requestId) {
+        return deleteResource(id, requestId);
+    }
+
+    // ---- facilities ----
     @GetMapping("/facilities")
     public ApiResponse<Map<String, Object>> listFacilities(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "") String keyword,
             @RequestHeader("X-Request-Id") String requestId) {
+        return listByType("FACILITY", null, page, size, keyword, requestId);
+    }
+
+    @PostMapping("/facilities")
+    public ApiResponse<Resource> createFacility(@RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return createResource("FACILITY", body, requestId);
+    }
+
+    @PutMapping("/facilities/{id}")
+    public ApiResponse<Resource> updateFacility(@PathVariable long id, @RequestBody Map<String, Object> body, @RequestHeader("X-Request-Id") String requestId) {
+        return updateResource(id, body, requestId);
+    }
+
+    @DeleteMapping("/facilities/{id}")
+    public ApiResponse<Void> deleteFacility(@PathVariable long id, @RequestHeader("X-Request-Id") String requestId) {
+        return deleteResource(id, requestId);
+    }
+
+    // ---- generic CRUD ----
+    private ApiResponse<Map<String, Object>> listByType(String type, Long parentId, int page, int size, String keyword, String requestId) {
         int offset = (page - 1) * size;
-        List<Resource> records = resourceMapper.findPage("FACILITY", null, offset, size, keyword);
-        long total = resourceMapper.count("FACILITY", null, keyword);
-        return buildPagedResponse(records, total, page, size, requestId);
-    }
-
-    @GetMapping("/{id}")
-    public ApiResponse<Resource> getById(
-            @PathVariable long id,
-            @RequestHeader("X-Request-Id") String requestId) {
-        Resource resource = resourceMapper.findById(id);
-        if (resource == null) {
-            return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
-        }
-        return ApiResponse.success(resource, requestId);
-    }
-
-    @PostMapping
-    public ApiResponse<Resource> create(
-            @RequestBody Resource resource,
-            @RequestHeader("X-Request-Id") String requestId) {
-        resourceMapper.insert(resource);
-        return ApiResponse.success(resource, requestId);
-    }
-
-    @PutMapping("/{id}")
-    public ApiResponse<Resource> update(
-            @PathVariable long id,
-            @RequestBody Resource resource,
-            @RequestHeader("X-Request-Id") String requestId) {
-        Resource existing = resourceMapper.findById(id);
-        if (existing == null) {
-            return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
-        }
-        Resource toUpdate = new Resource(
-                id,
-                resource.name(),
-                resource.type(),
-                resource.floor(),
-                resource.building(),
-                resource.capacity(),
-                resource.description(),
-                resource.active(),
-                null,
-                null,
-                existing.deleted()
-        );
-        resourceMapper.update(toUpdate);
-        Resource updated = resourceMapper.findById(id);
-        return ApiResponse.success(updated, requestId);
-    }
-
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(
-            @PathVariable long id,
-            @RequestHeader("X-Request-Id") String requestId) {
-        Resource existing = resourceMapper.findById(id);
-        if (existing == null) {
-            return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
-        }
-        resourceMapper.deleteById(id);
-        return ApiResponse.success(null, requestId);
-    }
-
-    private ApiResponse<Map<String, Object>> buildPagedResponse(
-            List<Resource> records, long total, int page, int size, String requestId) {
+        List<Resource> records = resourceMapper.findPage(type, parentId, offset, size, keyword);
+        long total = resourceMapper.count(type, parentId, keyword);
         Map<String, Object> data = new HashMap<>();
         data.put("records", records);
         data.put("total", total);
         data.put("page", page);
         data.put("size", size);
         return ApiResponse.success(data, requestId);
+    }
+
+    private ApiResponse<Resource> createResource(String type, Map<String, Object> body, String requestId) {
+        String name = (String) body.getOrDefault("name", "");
+        String address = (String) body.getOrDefault("address", "");
+        String floor = (String) body.getOrDefault("floor", "");
+        String building = (String) body.getOrDefault("building", "");
+        Integer capacity = body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : null;
+        String description = (String) body.getOrDefault("description", "");
+        Resource resource = new Resource(null, name, type, floor, building, capacity, description, true, null, null, false);
+        resourceMapper.insert(resource);
+        return ApiResponse.success(resource, requestId);
+    }
+
+    private ApiResponse<Resource> updateResource(long id, Map<String, Object> body, String requestId) {
+        Resource existing = resourceMapper.findById(id);
+        if (existing == null) return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
+        Resource toUpdate = new Resource(id,
+                (String) body.getOrDefault("name", existing.name()),
+                existing.type(),
+                (String) body.getOrDefault("floor", existing.floor()),
+                (String) body.getOrDefault("building", existing.building()),
+                body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : existing.capacity(),
+                (String) body.getOrDefault("description", existing.description()),
+                existing.active(), null, null, existing.deleted());
+        resourceMapper.update(toUpdate);
+        return ApiResponse.success(resourceMapper.findById(id), requestId);
+    }
+
+    private ApiResponse<Void> deleteResource(long id, String requestId) {
+        if (resourceMapper.findById(id) == null) return ApiResponse.failure("NOT_FOUND", "Resource not found", requestId);
+        resourceMapper.deleteById(id);
+        return ApiResponse.success(null, requestId);
     }
 }
