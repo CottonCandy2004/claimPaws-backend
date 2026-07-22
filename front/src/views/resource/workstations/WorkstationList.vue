@@ -23,20 +23,15 @@
     <el-dialog v-if="dialogVisible" v-model="dialogVisible" :title="editingId ? '编辑工位' : '新增工位'" width="520px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="名称" prop="name"><el-input v-model="form.name" /></el-form-item>
-        <el-form-item label="所属园区" prop="campusId">
-          <el-select v-model="form.campusId" placeholder="选择园区" style="width: 100%" @change="onCampusChange">
-            <el-option v-for="c in campuses" :key="c.id" :label="c.name" :value="c.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="所属楼宇" prop="buildingId">
-          <el-select v-model="form.buildingId" placeholder="选择楼宇" style="width: 100%" @change="onBuildingChange" :disabled="!form.campusId">
-            <el-option v-for="b in buildings" :key="b.id" :label="b.name" :value="b.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="所属楼层" prop="floorId">
-          <el-select v-model="form.floorId" placeholder="选择楼层" style="width: 100%" :disabled="!form.buildingId">
-            <el-option v-for="f in floors" :key="f.id" :label="f.name" :value="f.id" />
-          </el-select>
+        <el-form-item label="所属楼层" prop="floorCascade">
+          <el-cascader
+            v-model="form.floorCascade"
+            :options="campusTree"
+            :props="{ value: 'id', label: 'name', children: 'children', checkStrictly: false }"
+            placeholder="选择园区 > 楼宇 > 楼层"
+            style="width: 100%"
+            clearable
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -56,20 +51,16 @@ import { usePagination } from '@/composables/usePagination'
 
 const keyword = ref('')
 const data = ref<Workstation[]>([])
-const campuses = ref<any[]>([])
-const buildings = ref<any[]>([])
-const floors = ref<any[]>([])
+const campusTree = ref<any[]>([])
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
-const form = ref({ name: '', campusId: undefined as number | undefined, buildingId: undefined as number | undefined, floorId: undefined as number | undefined })
+const form = ref({ name: '', floorCascade: [] as number[] })
 const rules: FormRules = {
   name: [{ required: true, message: '请输入工位名称', trigger: 'blur' }],
-  campusId: [{ required: true, message: '请选择园区', trigger: 'change' }],
-  buildingId: [{ required: true, message: '请选择楼宇', trigger: 'change' }],
-  floorId: [{ required: true, message: '请选择楼层', trigger: 'change' }]
+  floorCascade: [{ required: true, message: '请选择楼层', trigger: 'change' }]
 }
 
 async function fetchData() {
@@ -77,47 +68,54 @@ async function fetchData() {
   try { const res = await resourceApi.getWorkstationList({ ...pageParams, keyword: keyword.value }); data.value = res.records; total.value = res.total }
   finally { loading.value = false }
 }
-async function loadCampuses() { campuses.value = await resourceApi.getAllCampuses() }
-async function onCampusChange() {
-  form.value.buildingId = undefined; form.value.floorId = undefined
-  buildings.value = []; floors.value = []
-  if (form.value.campusId) buildings.value = await resourceApi.getBuildingsByCampus(form.value.campusId)
-}
-async function onBuildingChange() {
-  form.value.floorId = undefined; floors.value = []
-  if (form.value.buildingId) floors.value = await resourceApi.getFloorsByBuilding(form.value.buildingId)
+async function loadCampusTree() {
+  const campuses = await resourceApi.getAllCampuses()
+  const tree = []
+  for (const c of campuses) {
+    const blds = await resourceApi.getBuildingsByCampus(c.id)
+    const bchildren = []
+    for (const b of blds) {
+      const fls = await resourceApi.getFloorsByBuilding(b.id)
+      bchildren.push({ ...b, children: fls.map((f: any) => ({ ...f, leaf: true })) })
+    }
+    tree.push({ ...c, children: bchildren })
+  }
+  campusTree.value = tree
 }
 function search() { resetPage(); fetchData() }
 function handleCreate() {
   editingId.value = null
-  form.value = { name: '', campusId: undefined, buildingId: undefined, floorId: undefined }
-  buildings.value = []; floors.value = []
+  form.value = { name: '', floorCascade: [] }
   dialogVisible.value = true
 }
 async function handleEdit(row: any) {
   editingId.value = row.id
-  const allCampuses = await resourceApi.getAllCampuses()
-  const campus = allCampuses.find((c: any) => c.name === row.buildingName)
-  const cid = campus?.id
-  campuses.value = allCampuses
-  if (cid) {
-    buildings.value = await resourceApi.getBuildingsByCampus(cid)
-    const building = buildings.value.find((b: any) => b.name === row.buildingName)
-    const bid = building?.id
-    if (bid) floors.value = await resourceApi.getFloorsByBuilding(bid)
-    form.value = { name: row.name, campusId: cid || undefined, buildingId: bid || undefined, floorId: floors.value.find((f: any) => f.name === row.floorName)?.id ?? undefined }
-  } else {
-    form.value = { name: row.name, campusId: undefined, buildingId: undefined, floorId: undefined }
-  }
+  await loadCampusTree()
+  const cascade = findCascadePath(row.buildingName, row.floorName)
+  form.value = { name: row.name, floorCascade: cascade }
   dialogVisible.value = true
+}
+function findCascadePath(buildingName: string, floorName: string): number[] {
+  for (const c of campusTree.value) {
+    for (const b of c.children || []) {
+      if (b.name === buildingName) {
+        for (const f of b.children || []) {
+          if (f.name === floorName) return [c.id, b.id, f.id]
+        }
+      }
+    }
+  }
+  return []
 }
 async function handleSubmit() {
   if (!formRef.value) return
   await formRef.value.validate(async (v) => {
     if (!v) return; submitting.value = true
     try {
-      if (editingId.value) { await resourceApi.updateWorkstation(editingId.value, form.value as any); ElMessage.success('更新成功') }
-      else { await resourceApi.createWorkstation(form.value as any); ElMessage.success('创建成功') }
+      const cascade = form.value.floorCascade
+      const payload = { name: form.value.name, floorId: cascade[cascade.length - 1] }
+      if (editingId.value) { await resourceApi.updateWorkstation(editingId.value, payload as any); ElMessage.success('更新成功') }
+      else { await resourceApi.createWorkstation(payload as any); ElMessage.success('创建成功') }
       dialogVisible.value = false; fetchData()
     } finally { submitting.value = false }
   })
@@ -126,7 +124,7 @@ async function handleDelete(row: Workstation) {
   await ElMessageBox.confirm(`确定删除工位 "${row.name}"？`, '确认删除', { type: 'warning' })
   await resourceApi.deleteWorkstation(row.id); ElMessage.success('删除成功'); fetchData()
 }
-onMounted(() => { fetchData(); loadCampuses() })
+onMounted(() => { fetchData(); loadCampusTree() })
 </script>
 
 <style scoped lang="scss">
