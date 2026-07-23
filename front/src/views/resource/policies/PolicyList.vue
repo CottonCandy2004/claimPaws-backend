@@ -37,8 +37,14 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
         <el-form-item label="策略名称" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="资源类型" prop="resourceType">
-          <el-select v-model="form.resourceType" style="width: 100%">
+          <el-select v-model="form.resourceType" style="width: 100%" @change="onPolicyResourceTypeChange">
             <el-option label="会议室" value="MEETING_ROOM" /><el-option label="工位" value="WORKSTATION" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="适用资源">
+          <el-select v-model="form.resourceId" placeholder="选择资源（留空为全局策略）" style="width: 100%" clearable filterable>
+            <el-option label="全局策略" :value="0" />
+            <el-option v-for="r in policyResources" :key="r.id" :label="r.name" :value="r.id" />
           </el-select>
         </el-form-item>
         <el-row :gutter="12">
@@ -109,11 +115,13 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import type { ReservationPolicy } from '@/types'
 import * as policyApi from '@/api/modules/policy'
 import * as roleApi from '@/api/modules/role'
+import * as resourceApi from '@/api/modules/resource'
 import { usePagination } from '@/composables/usePagination'
 
 const keyword = ref('')
 const data = ref<ReservationPolicy[]>([])
 const allRoles = ref<any[]>([])
+const policyResources = ref<any[]>([])
 const selectedRoles = ref<any[]>([])
 const selectedRoleIds = ref<any[]>([])
 const dialogVisible = ref(false)
@@ -123,12 +131,19 @@ const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
 const form = ref({
-  name: '',   resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION',
+  name: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceId: 0,
   timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30,
   maxDuration: 240, cancelDeadline: 60, checkInWindow: 15,
   noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: ''
 })
-const rules: FormRules = { name: [{ required: true, message: '请输入策略名称', trigger: 'blur' }], resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }] }
+const rules: FormRules = { name: [{ required: true, message: '请输入策略名称', trigger: 'blur' }] }
+
+async function onPolicyResourceTypeChange() {
+  const res = form.value.resourceType === 'MEETING_ROOM'
+    ? await resourceApi.getRoomList({ page: 1, size: 1000 })
+    : await resourceApi.getWorkstationList({ page: 1, size: 1000 })
+  policyResources.value = res.records || []
+}
 
 const availableRoles = computed(() => allRoles.value.filter(r => !selectedRoles.value.find(s => s.id === r.id)))
 
@@ -156,7 +171,7 @@ function search() { resetPage(); fetchData() }
 function handleCreate() {
   editingId.value = null; selectedRoles.value = []; selectedRoleIds.value = []
   dialogKey.value++
-  form.value = { name: '', resourceType: 'MEETING_ROOM', timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
+  form.value = { name: '', resourceType: 'MEETING_ROOM', resourceId: 0, timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
   dialogVisible.value = true
 }
 async function handleEdit(row: any) {
@@ -194,7 +209,7 @@ async function handleDelete(row: ReservationPolicy) {
   await ElMessageBox.confirm(`确定删除策略 "${row.name}"？`, '确认删除', { type: 'warning' })
   await policyApi.deletePolicy(row.id); ElMessage.success('删除成功'); fetchData()
 }
-onMounted(() => { fetchData(); loadRoles() })
+onMounted(() => { fetchData(); loadRoles(); onPolicyResourceTypeChange() })
 </script>
 
 <style scoped lang="scss">
