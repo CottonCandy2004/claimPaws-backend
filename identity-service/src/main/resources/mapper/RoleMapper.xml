@@ -17,14 +17,15 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id">
-        INSERT INTO roles (name, description, created_at, updated_at)
-        VALUES (#{name}, #{description}, NOW(), NOW())
+        INSERT INTO roles (name, code, description, created_at, updated_at)
+        VALUES (#{name}, #{code}, #{description}, NOW(), NOW())
     </insert>
 
     <update id="update">
         UPDATE roles
         <set>
             <if test="name != null">name = #{name},</if>
+            <if test="code != null">code = #{code},</if>
             <if test="description != null">description = #{description},</if>
             updated_at = NOW()
         </set>

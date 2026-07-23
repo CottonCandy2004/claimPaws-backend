@@ -48,7 +48,7 @@ public class RoleController {
         if (name == null || name.isBlank()) {
             return ResponseEntity.ok(ApiResponse.failure("INVALID_INPUT", "name is required", requestId));
         }
-        Role role = new Role(null, name, (String) body.get("description"), null, null, false);
+        Role role = new Role(null, name, (String) body.get("code"), (String) body.get("description"), null, null, false);
         roleMapper.insert(role);
         return ResponseEntity.ok(ApiResponse.success(role, requestId));
     }
@@ -66,6 +66,7 @@ public class RoleController {
         Role updated = new Role(
                 id,
                 body.containsKey("name") ? (String) body.get("name") : existing.name(),
+                body.containsKey("code") ? (String) body.get("code") : existing.code(),
                 body.containsKey("description") ? (String) body.get("description") : existing.description(),
                 existing.createdAt(),
                 null,

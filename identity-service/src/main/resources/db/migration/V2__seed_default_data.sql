@@ -1,6 +1,6 @@
-INSERT INTO roles (name, description) VALUES
-    ('admin', '系统管理员'),
-    ('user', '普通用户');
+INSERT INTO roles (name, code, description) VALUES
+    ('admin', 'ADMIN', '系统管理员'),
+    ('user', 'USER', '普通用户');
 
 INSERT INTO users (username, password_hash, display_name, enabled) VALUES
     ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '管理员', TRUE);
