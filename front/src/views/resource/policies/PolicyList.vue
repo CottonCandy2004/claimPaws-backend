@@ -42,10 +42,16 @@
           </el-select>
         </el-form-item>
         <el-form-item label="适用资源">
-          <el-select v-model="form.resourceId" placeholder="选择资源（留空为全局策略）" style="width: 100%" clearable filterable>
-            <el-option label="全局策略" :value="0" />
-            <el-option v-for="r in policyResources" :key="r.id" :label="r.name" :value="r.id" />
-          </el-select>
+          <el-cascader
+            v-model="form.resourceCascade"
+            :options="resourceTree"
+            :props="{ value: 'id', label: 'name', children: 'children', multiple: true, emitPath: false, checkStrictly: false }"
+            placeholder="选择资源（留空为全局策略）"
+            style="width: 100%"
+            clearable
+            collapse-tags
+            collapse-tags-tooltip
+          />
         </el-form-item>
         <el-row :gutter="12">
           <el-col :span="12"><el-form-item label="时段粒度(min)" prop="timeSlotGranularity"><el-input-number v-model="form.timeSlotGranularity" :min="5" :step="5" /></el-form-item></el-col>
@@ -122,6 +128,7 @@ const keyword = ref('')
 const data = ref<ReservationPolicy[]>([])
 const allRoles = ref<any[]>([])
 const policyResources = ref<any[]>([])
+const resourceTree = ref<any[]>([])
 const selectedRoles = ref<any[]>([])
 const selectedRoleIds = ref<any[]>([])
 const dialogVisible = ref(false)
@@ -131,7 +138,7 @@ const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
 const form = ref({
-  name: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceId: 0,
+  name: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceCascade: [] as number[],
   timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30,
   maxDuration: 240, cancelDeadline: 60, checkInWindow: 15,
   noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: ''
@@ -139,10 +146,32 @@ const form = ref({
 const rules: FormRules = { name: [{ required: true, message: '请输入策略名称', trigger: 'blur' }] }
 
 async function onPolicyResourceTypeChange() {
-  const res = form.value.resourceType === 'MEETING_ROOM'
-    ? await resourceApi.getRoomList({ page: 1, size: 1000 })
-    : await resourceApi.getWorkstationList({ page: 1, size: 1000 })
+  const type = form.value.resourceType === 'MEETING_ROOM' ? 'ROOM' : 'WORKSTATION'
+  const res = await resourceApi.getRoomList({ page: 1, size: 1000 })
   policyResources.value = res.records || []
+  // Build cascader tree in background
+  loadResourceTree()
+}
+async function loadResourceTree() {
+  const campuses = await resourceApi.getAllCampuses()
+  const tree = []
+  for (const c of campuses) {
+    const blds = await resourceApi.getBuildingsByCampus(c.id)
+    const bchildren = []
+    for (const b of blds) {
+      const fls = await resourceApi.getFloorsByBuilding(b.id)
+      const fchildren = []
+      for (const f of fls) {
+        const resources = form.value.resourceType === 'MEETING_ROOM'
+          ? (await resourceApi.getRoomList({ page: 1, size: 1000, floorId: f.id })).records || []
+          : (await resourceApi.getWorkstationList({ page: 1, size: 1000, floorId: f.id })).records || []
+        if (resources.length > 0) fchildren.push({ ...f, children: resources.map((r: any) => ({ ...r, leaf: true })) })
+      }
+      if (fchildren.length > 0) bchildren.push({ ...b, children: fchildren })
+    }
+    if (bchildren.length > 0) tree.push({ ...c, children: bchildren })
+  }
+  resourceTree.value = tree
 }
 
 const availableRoles = computed(() => allRoles.value.filter(r => !selectedRoles.value.find(s => s.id === r.id)))
@@ -171,7 +200,7 @@ function search() { resetPage(); fetchData() }
 function handleCreate() {
   editingId.value = null; selectedRoles.value = []; selectedRoleIds.value = []
   dialogKey.value++
-  form.value = { name: '', resourceType: 'MEETING_ROOM', resourceId: 0, timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
+  form.value = { name: '', resourceType: 'MEETING_ROOM', resourceCascade: [], timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
   dialogVisible.value = true
 }
 async function handleEdit(row: any) {
@@ -196,6 +225,7 @@ async function handleSubmit() {
   await formRef.value.validate(async (v) => {
     if (!v) return; submitting.value = true
     try {
+      form.value.resourceId = form.value.resourceCascade.length > 0 ? form.value.resourceCascade[0] : 0
       form.value.approverRoles = form.value.approvalLevel === 1
         ? selectedRoles.value.map(r => r.id).join(',')
         : (form.value.approvalLevel === 2 ? selectedRoleIds.value.join(',') : '')
