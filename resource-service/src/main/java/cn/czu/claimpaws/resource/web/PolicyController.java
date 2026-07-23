@@ -94,7 +94,7 @@ public class PolicyController {
     @PutMapping("/{id}")
     public ApiResponse<ReservationPolicy> update(
             @PathVariable long id,
-            @RequestBody ReservationPolicy policy,
+            @RequestBody Map<String, Object> body,
             @RequestHeader("X-Request-Id") String requestId) {
         ReservationPolicy existing = policyMapper.findById(id);
         if (existing == null) {
@@ -102,21 +102,18 @@ public class PolicyController {
         }
         ReservationPolicy toUpdate = new ReservationPolicy(
                 id,
-                policy.resourceId(),
-                policy.name() != null ? policy.name() : existing.name(),
-                policy.slotMinutes() != null ? policy.slotMinutes() : existing.slotMinutes(),
-                policy.advanceDays() != null ? policy.advanceDays() : existing.advanceDays(),
-                policy.minDurationMinutes() != null ? policy.minDurationMinutes() : existing.minDurationMinutes(),
-                policy.maxDurationMinutes() != null ? policy.maxDurationMinutes() : existing.maxDurationMinutes(),
-                policy.cancelDeadlineMinutes() != null ? policy.cancelDeadlineMinutes() : existing.cancelDeadlineMinutes(),
-                policy.checkInWindowMinutes() != null ? policy.checkInWindowMinutes() : existing.checkInWindowMinutes(),
-                policy.requiresApproval() != null ? policy.requiresApproval() : existing.requiresApproval(),
-                policy.approvalLevel() != null ? policy.approvalLevel() : existing.approvalLevel(),
-                policy.description() != null ? policy.description() : existing.description(),
-                policy.active() != null ? policy.active() : existing.active(),
-                null,
-                null,
-                existing.deleted()
+                body.containsKey("resourceId") ? Long.valueOf(body.get("resourceId").toString()) : existing.resourceId(),
+                body.containsKey("name") ? (String) body.get("name") : existing.name(),
+                body.containsKey("timeSlotGranularity") ? Integer.valueOf(body.get("timeSlotGranularity").toString()) : existing.slotMinutes(),
+                body.containsKey("advanceBookingDays") ? Integer.valueOf(body.get("advanceBookingDays").toString()) : existing.advanceDays(),
+                body.containsKey("minDuration") ? Integer.valueOf(body.get("minDuration").toString()) : existing.minDurationMinutes(),
+                body.containsKey("maxDuration") ? Integer.valueOf(body.get("maxDuration").toString()) : existing.maxDurationMinutes(),
+                body.containsKey("cancelDeadline") ? Integer.valueOf(body.get("cancelDeadline").toString()) : existing.cancelDeadlineMinutes(),
+                body.containsKey("checkInWindow") ? Integer.valueOf(body.get("checkInWindow").toString()) : existing.checkInWindowMinutes(),
+                body.containsKey("approvalLevel") ? Integer.valueOf(body.get("approvalLevel").toString()) > 0 : existing.requiresApproval(),
+                body.containsKey("approvalLevel") ? Integer.valueOf(body.get("approvalLevel").toString()) : existing.approvalLevel(),
+                body.containsKey("approverRoles") ? (String) body.get("approverRoles") : existing.description(),
+                existing.active(), null, null, existing.deleted()
         );
         policyMapper.update(toUpdate);
         ReservationPolicy updated = policyMapper.findById(id);
