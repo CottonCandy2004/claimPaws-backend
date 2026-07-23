@@ -28,7 +28,7 @@ public class ResourceService {
                     ? policyMapper.findById(resource.policyId())
                     : policyMapper.requireActiveByResourceId(resourceId);
             if (policy == null) {
-                policy = new ReservationPolicy(0L, 0L, "default", null, 30, 7, 30, 240, 60, 15, false, 0, "", true, null, null, false);
+                policy = new ReservationPolicy(0L, 0L, "default", null, 1, 7, 30, 240, 60, 15, false, 0, "", true, null, null, false);
             }
             return ReservationSnapshot.from(resource, policy);
         } catch (Exception e) {
@@ -38,7 +38,7 @@ public class ResourceService {
 
     private ReservationSnapshot defaultSnapshot(long resourceId) {
         Resource resource = new Resource(resourceId, "default", "ROOM", "", "", 0, "", null, true, null, null, false);
-        ReservationPolicy policy = new ReservationPolicy(0L, 0L, "default", null, 30, 7, 30, 240, 60, 15, false, 0, "", true, null, null, false);
+        ReservationPolicy policy = new ReservationPolicy(0L, 0L, "default", null, 1, 7, 30, 240, 60, 15, false, 0, "", true, null, null, false);
         return ReservationSnapshot.from(resource, policy);
     }
 }
