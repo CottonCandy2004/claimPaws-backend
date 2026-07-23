@@ -87,7 +87,7 @@ public class ReservationController {
         if (reservation == null) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
-        reservationMapper.updateStatus(id, ReservationStatus.CANCELLED.name());
+        reservationMapper.updateStatus(id, ReservationStatus.CANCELLED.name(), Boolean.TRUE);
         reservationMapper.deleteOccupiedSlots(id);
         Reservation updated = reservationMapper.findById(id);
         return ApiResponse.success(ReservationView.from(updated, 0), requestId);
@@ -101,7 +101,7 @@ public class ReservationController {
         if (reservation == null) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
-        reservationMapper.updateStatus(id, ReservationStatus.CHECKED_IN.name());
+        reservationMapper.updateStatus(id, ReservationStatus.CHECKED_IN.name(), null);
         Reservation updated = reservationMapper.findById(id);
         return ApiResponse.success(ReservationView.from(updated, 0), requestId);
     }
