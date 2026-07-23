@@ -10,7 +10,7 @@
         SELECT * FROM departments WHERE id = #{id} AND deleted = FALSE
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+    <insert id="insert">
         INSERT INTO departments (name, parent_id, sort, created_at, updated_at)
         VALUES (#{name}, #{parentId}, #{sort}, NOW(), NOW())
     </insert>
