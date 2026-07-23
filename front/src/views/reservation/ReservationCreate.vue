@@ -15,7 +15,17 @@
             placeholder="选择园区 > 楼宇 > 楼层 > 资源" style="width: 100%" clearable />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
-          <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" :disabled-minutes="disabledMinute" :disabled-seconds="disabledSecond" />
+          <div style="display:flex;gap:8px">
+            <el-date-picker v-model="form.startDate" type="date" placeholder="日期" style="width: 100%" value-format="YYYY-MM-DD" />
+            <el-time-select v-model="form.startTime" placeholder="时间" start="00:00" end="23:30" step="00:30" style="width: 160px" />
+          </div>
+        </el-form-item>
+        <el-form-item label="结束时间" prop="endTime">
+          <div style="display:flex;gap:8px">
+            <el-date-picker v-model="form.endDate" type="date" placeholder="日期" style="width: 100%" value-format="YYYY-MM-DD" />
+            <el-time-select v-model="form.endTime" placeholder="时间" start="00:00" end="23:30" step="00:30" style="width: 160px" />
+          </div>
+        </el-form-item>
         </el-form-item>
         <el-form-item label="结束时间" prop="endTime">
           <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" :disabled-minutes="disabledMinute" :disabled-seconds="disabledSecond" />
@@ -41,9 +51,7 @@ const router = useRouter()
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const campusTree = ref<any[]>([])
-const form = ref({ title: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceCascade: [] as number[], startTime: '', endTime: '', description: '' })
-const disabledMinute = () => Array.from({length: 60}, (_, i) => i).filter(i => i % 30 !== 0)
-const disabledSecond = () => Array.from({length: 60}, (_, i) => i)
+const form = ref({ title: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceCascade: [] as number[], startDate: '', startTime: '00:00', endDate: '', endTime: '00:30', description: '' })
 const rules: FormRules = {
   title: [{ required: true, message: '请输入预约标题', trigger: 'blur' }],
   resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
@@ -99,8 +107,8 @@ async function handleSubmit() {
         resourceId: cascade[cascade.length - 1],
         title: form.value.title,
         description: form.value.description,
-        startTime: form.value.startTime,
-        endTime: form.value.endTime,
+        startTime: form.value.startDate + ' ' + form.value.startTime + ':00',
+        endTime: form.value.endDate + ' ' + form.value.endTime + ':00',
         attendees: []
       })
       ElMessage.success('预约创建成功'); router.push('/reservations')
