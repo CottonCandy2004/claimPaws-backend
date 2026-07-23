@@ -116,6 +116,7 @@ const data = ref<ReservationPolicy[]>([])
 const allRoles = ref<any[]>([])
 const selectedRoles = ref<any[]>([])
 const selectedRoleIds = ref<any[]>([])
+const resourceTree = ref<any[]>([])
 const dialogVisible = ref(false)
 const dialogKey = ref(0)
 const editingId = ref<number | null>(null)
@@ -185,7 +186,7 @@ function search() { resetPage(); fetchData() }
 function handleCreate() {
   editingId.value = null; selectedRoles.value = []; selectedRoleIds.value = []
   dialogKey.value++
-  form.value = { name: '', resourceType: 'MEETING_ROOM', resourceId: 0, resourceCascade: [], timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
+  form.value = { name: '', resourceType: 'MEETING_ROOM', resourceId: 0, resourceIds: [], resourceCascade: [], timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
   dialogVisible.value = true
 }
 async function handleEdit(row: any) {
