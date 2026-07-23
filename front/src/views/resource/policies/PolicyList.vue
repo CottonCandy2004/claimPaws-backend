@@ -33,7 +33,7 @@
       <el-pagination v-model:current-page="pageParams.page" v-model:page-size="pageParams.size" :total="total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next, jumper" style="margin-top: 16px; justify-content: flex-end" @size-change="fetchData" @current-change="fetchData" />
     </el-card>
 
-    <el-dialog v-if="dialogVisible" v-model="dialogVisible" :title="editingId ? '编辑策略' : '新增策略'" width="600px">
+    <el-dialog v-if="dialogVisible" v-model="dialogVisible" :title="editingId ? '编辑策略' : '新增策略'" width="600px" :key="dialogKey">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
         <el-form-item label="策略名称" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="资源类型" prop="resourceType">
@@ -117,6 +117,7 @@ const allRoles = ref<any[]>([])
 const selectedRoles = ref<any[]>([])
 const selectedRoleIds = ref<any[]>([])
 const dialogVisible = ref(false)
+const dialogKey = ref(0)
 const editingId = ref<number | null>(null)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
@@ -154,6 +155,7 @@ async function fetchData() {
 function search() { resetPage(); fetchData() }
 function handleCreate() {
   editingId.value = null; selectedRoles.value = []; selectedRoleIds.value = []
+  dialogKey.value++
   form.value = { name: '', resourceType: 'MEETING_ROOM', timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
   dialogVisible.value = true
 }
@@ -170,6 +172,7 @@ function handleEdit(row: any) {
     selectedRoles.value = []; selectedRoleIds.value = []
   }
   Object.assign(form.value, { ...row, approvalLevel: (row.approvalLevel ?? 0) as 0 | 1 | 2, approverRoles: row.approverRoles || '' })
+  dialogKey.value++
   dialogVisible.value = true
 }
 async function handleSubmit() {

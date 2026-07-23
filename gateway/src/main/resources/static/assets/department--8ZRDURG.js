@@ -1,1 +1,0 @@
-import{K as r,M as n,N as a,L as p}from"./index-aqqoGN5C.js";function u(){return r("/departments/tree")}function m(e){return a("/departments",e)}function d(e,t){return n(`/departments/${e}`,t)}function o(e){return p(`/departments/${e}`)}export{m as c,o as d,u as g,d as u};
