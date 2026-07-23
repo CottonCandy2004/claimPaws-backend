@@ -28,6 +28,9 @@
         <el-form-item label="姓名" prop="displayName"><el-input v-model="form.displayName" /></el-form-item>
         <el-form-item label="邮箱" prop="email"><el-input v-model="form.email" /></el-form-item>
         <el-form-item label="手机" prop="phone"><el-input v-model="form.phone" /></el-form-item>
+        <el-form-item label="部门">
+          <el-tree-select v-model="form.departmentId" :data="deptTree" :props="{ value: 'id', label: 'name', children: 'children' }" check-strictly clearable placeholder="选择部门" style="width: 100%" />
+        </el-form-item>
         <el-form-item label="密码" v-if="!editingId"><el-input v-model="form.password" type="password" /></el-form-item>
       </el-form>
       <template #footer>
@@ -43,16 +46,18 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import type { User } from '@/types'
 import * as userApi from '@/api/modules/user'
+import * as deptApi from '@/api/modules/department'
 import { usePagination } from '@/composables/usePagination'
 
 const keyword = ref('')
 const data = ref<User[]>([])
+const deptTree = ref<any[]>([])
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
-const form = ref({ username: '', displayName: '', email: '', phone: '', password: '' })
+const form = ref({ username: '', displayName: '', email: '', phone: '', password: '', departmentId: undefined as number | undefined })
 const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   displayName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
@@ -69,8 +74,8 @@ async function fetchData() {
   finally { loading.value = false }
 }
 function search() { resetPage(); fetchData() }
-function handleCreate() { editingId.value = null; form.value = { username: '', displayName: '', email: '', phone: '', password: '' }; dialogVisible.value = true }
-function handleEdit(row: User) { editingId.value = row.id; form.value = { username: row.username, displayName: row.displayName, email: row.email || '', phone: row.phone || '', password: '' }; dialogVisible.value = true }
+function handleCreate() { editingId.value = null; form.value = { username: '', displayName: '', email: '', phone: '', password: '', departmentId: undefined }; dialogVisible.value = true }
+function handleEdit(row: User) { editingId.value = row.id; form.value = { username: row.username, displayName: row.displayName, email: row.email || '', phone: row.phone || '', password: '', departmentId: row.departmentId }; dialogVisible.value = true }
 async function handleSubmit() {
   if (!formRef.value) return
   await formRef.value.validate(async (valid) => {
@@ -87,7 +92,8 @@ async function handleDelete(row: User) {
   await ElMessageBox.confirm(`确定删除用户 "${row.username}"？`, '确认删除', { type: 'warning' })
   await userApi.deleteUser(row.id); ElMessage.success('删除成功'); fetchData()
 }
-onMounted(fetchData)
+async function loadDeptTree() { deptTree.value = await deptApi.getDepartmentTree() }
+onMounted(() => { fetchData(); loadDeptTree() })
 </script>
 
 <style scoped lang="scss">
