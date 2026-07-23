@@ -35,6 +35,11 @@
           />
         </el-form-item>
         <el-form-item label="容量" prop="capacity"><el-input-number v-model="form.capacity" :min="1" /></el-form-item>
+        <el-form-item label="预约策略">
+          <el-select v-model="form.policyId" placeholder="选择策略（可选）" style="width: 100%" clearable>
+            <el-option v-for="p in policies" :key="p.id" :label="p.name" :value="p.id" />
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -49,17 +54,19 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import type { MeetingRoom } from '@/types'
 import * as resourceApi from '@/api/modules/resource'
+import * as policyApi from '@/api/modules/policy'
 import { usePagination } from '@/composables/usePagination'
 
 const keyword = ref('')
 const data = ref<MeetingRoom[]>([])
 const campusTree = ref<any[]>([])
+const policies = ref<any[]>([])
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
-const form = ref({ name: '', floorCascade: [] as number[], capacity: 10 })
+const form = ref({ name: '', floorCascade: [] as number[], capacity: 10, policyId: undefined as number | undefined })
 const rules: FormRules = {
   name: [{ required: true, message: '请输入会议室名称', trigger: 'blur' }],
   floorCascade: [{ required: true, message: '请选择楼层', trigger: 'change' }]
@@ -87,14 +94,14 @@ async function loadCampusTree() {
 function search() { resetPage(); fetchData() }
 function handleCreate() {
   editingId.value = null
-  form.value = { name: '', floorCascade: [], capacity: 10 }
+  form.value = { name: '', floorCascade: [], capacity: 10, policyId: undefined }
   dialogVisible.value = true
 }
 async function handleEdit(row: any) {
   editingId.value = row.id
   await loadCampusTree()
   const cascade = findCascadePath(row.buildingName, row.floorName)
-  form.value = { name: row.name, floorCascade: cascade, capacity: row.capacity }
+  form.value = { name: row.name, floorCascade: cascade, capacity: row.capacity, policyId: row.policyId || undefined }
   dialogVisible.value = true
 }
 function findCascadePath(buildingName: string, floorName: string): number[] {
@@ -109,13 +116,17 @@ function findCascadePath(buildingName: string, floorName: string): number[] {
   }
   return []
 }
+async function loadPolicies() {
+  const res = await policyApi.getPolicyList({ page: 1, size: 100 })
+  policies.value = (res.records || []).filter((p: any) => p.resourceType === 'MEETING_ROOM')
+}
 async function handleSubmit() {
   if (!formRef.value) return
   await formRef.value.validate(async (v) => {
     if (!v) return; submitting.value = true
     try {
       const cascade = form.value.floorCascade
-      const payload = { name: form.value.name, floorId: cascade[cascade.length - 1], capacity: form.value.capacity }
+      const payload = { name: form.value.name, floorId: cascade[cascade.length - 1], capacity: form.value.capacity, policyId: form.value.policyId || null }
       if (editingId.value) { await resourceApi.updateRoom(editingId.value, payload as any); ElMessage.success('更新成功') }
       else { await resourceApi.createRoom(payload as any); ElMessage.success('创建成功') }
       dialogVisible.value = false; fetchData()
@@ -126,7 +137,7 @@ async function handleDelete(row: MeetingRoom) {
   await ElMessageBox.confirm(`确定删除会议室 "${row.name}"？`, '确认删除', { type: 'warning' })
   await resourceApi.deleteRoom(row.id); ElMessage.success('删除成功'); fetchData()
 }
-onMounted(() => { fetchData(); loadCampusTree() })
+onMounted(() => { fetchData(); loadCampusTree(); loadPolicies() })
 </script>
 
 <style scoped lang="scss">
