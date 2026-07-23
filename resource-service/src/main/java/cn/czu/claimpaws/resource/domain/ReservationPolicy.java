@@ -6,6 +6,7 @@ public record ReservationPolicy(
         Long id,
         Long resourceId,
         String name,
+        String resourceType,
         Integer slotMinutes,
         Integer advanceDays,
         Integer minDurationMinutes,

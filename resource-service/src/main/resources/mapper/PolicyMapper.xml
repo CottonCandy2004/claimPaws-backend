@@ -7,6 +7,7 @@
             <idArg column="id" javaType="java.lang.Long"/>
             <arg column="resource_id" javaType="java.lang.Long"/>
             <arg column="name" javaType="java.lang.String"/>
+            <arg column="resource_type" javaType="java.lang.String"/>
             <arg column="slot_minutes" javaType="java.lang.Integer"/>
             <arg column="advance_days" javaType="java.lang.Integer"/>
             <arg column="min_duration_minutes" javaType="java.lang.Integer"/>
@@ -60,14 +61,15 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id">
-        INSERT INTO reservation_policies (resource_id, name, slot_minutes, advance_days, min_duration_minutes, max_duration_minutes, cancel_deadline_minutes, check_in_window_minutes, requires_approval, approval_level, description, active, created_at, updated_at)
-        VALUES (#{resourceId}, #{name}, #{slotMinutes}, #{advanceDays}, #{minDurationMinutes}, #{maxDurationMinutes}, #{cancelDeadlineMinutes}, #{checkInWindowMinutes}, #{requiresApproval}, #{approvalLevel}, #{description}, #{active}, NOW(), NOW())
+        INSERT INTO reservation_policies (resource_id, name, resource_type, slot_minutes, advance_days, min_duration_minutes, max_duration_minutes, cancel_deadline_minutes, check_in_window_minutes, requires_approval, approval_level, description, active, created_at, updated_at)
+        VALUES (#{resourceId}, #{name}, #{resourceType}, #{slotMinutes}, #{advanceDays}, #{minDurationMinutes}, #{maxDurationMinutes}, #{cancelDeadlineMinutes}, #{checkInWindowMinutes}, #{requiresApproval}, #{approvalLevel}, #{description}, #{active}, NOW(), NOW())
     </insert>
 
     <update id="update">
         UPDATE reservation_policies
         SET resource_id = #{resourceId},
             name = #{name},
+            resource_type = #{resourceType},
             slot_minutes = #{slotMinutes},
             advance_days = #{advanceDays},
             min_duration_minutes = #{minDurationMinutes},

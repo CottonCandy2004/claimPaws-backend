@@ -21,9 +21,6 @@
           <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
         </el-form-item>
         <el-form-item label="描述"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
-        <el-form-item label="参会人员">
-          <el-select v-model="form.attendees" multiple filterable allow-create placeholder="输入参会人员" style="width: 100%" />
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="submitting" @click="handleSubmit">提交预约</el-button>
           <el-button @click="$router.back()">取消</el-button>
@@ -45,7 +42,7 @@ const router = useRouter()
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const availableResources = ref<Array<MeetingRoom | Workstation>>([])
-const form = ref({ title: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceId: undefined as number | undefined, startTime: '', endTime: '', description: '', attendees: [] as string[] })
+const form = ref({ title: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceId: undefined as number | undefined, startTime: '', endTime: '', description: '' })
 const rules: FormRules = {
   title: [{ required: true, message: '请输入预约标题', trigger: 'blur' }],
   resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
@@ -67,7 +64,7 @@ async function handleSubmit() {
   await formRef.value.validate(async (v) => {
     if (!v) return; submitting.value = true
     try {
-      await reservationApi.createReservation({ resourceId: form.value.resourceId!, title: form.value.title, description: form.value.description, startTime: form.value.startTime, endTime: form.value.endTime, attendees: form.value.attendees })
+      await reservationApi.createReservation({ resourceId: form.value.resourceId!, title: form.value.title, description: form.value.description, startTime: form.value.startTime, endTime: form.value.endTime, attendees: [] })
       ElMessage.success('预约创建成功'); router.push('/reservations')
     } catch { ElMessage.error('预约创建失败，可能存在时间冲突') }
     finally { submitting.value = false }
