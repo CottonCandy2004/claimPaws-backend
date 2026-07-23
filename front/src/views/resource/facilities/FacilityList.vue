@@ -29,6 +29,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="描述"><el-input v-model="form.description" type="textarea" /></el-form-item>
+        <el-form-item label="预约策略">
+          <el-select v-model="form.policyId" placeholder="选择策略（可选）" style="width: 100%" clearable>
+            <el-option v-for="p in policies" :key="p.id" :label="p.name" :value="p.id" />
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -43,16 +48,18 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import type { Facility } from '@/types'
 import * as resourceApi from '@/api/modules/resource'
+import * as policyApi from '@/api/modules/policy'
 import { usePagination } from '@/composables/usePagination'
 
 const keyword = ref('')
 const data = ref<Facility[]>([])
+const policies = ref<any[]>([])
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const { pageParams, total, loading, resetPage } = usePagination()
-const form = ref({ name: '', type: '', description: '' })
+const form = ref({ name: '', type: '', description: '', policyId: undefined as number | undefined })
 const facilityTypes = ['投影仪', '白板', '视频会议设备', '音响系统', '打印机', '饮水机', '网络设备', '空调', '其他']
 const rules: FormRules = { name: [{ required: true, message: '请输入设施名称', trigger: 'blur' }], type: [{ required: true, message: '请输入设施类型', trigger: 'blur' }] }
 
@@ -62,8 +69,8 @@ async function fetchData() {
   finally { loading.value = false }
 }
 function search() { resetPage(); fetchData() }
-function handleCreate() { editingId.value = null; form.value = { name: '', type: '', description: '' }; dialogVisible.value = true }
-function handleEdit(row: Facility) { editingId.value = row.id; form.value = { name: row.name, type: row.type, description: row.description || '' }; dialogVisible.value = true }
+function handleCreate() { editingId.value = null; form.value = { name: '', type: '', description: '', policyId: undefined }; dialogVisible.value = true }
+function handleEdit(row: Facility) { editingId.value = row.id; form.value = { name: row.name, type: row.type, description: row.description || '', policyId: (row as any).policyId || undefined }; dialogVisible.value = true }
 async function handleSubmit() {
   if (!formRef.value) return
   await formRef.value.validate(async (v) => {
@@ -79,7 +86,11 @@ async function handleDelete(row: Facility) {
   await ElMessageBox.confirm(`确定删除设施 "${row.name}"？`, '确认删除', { type: 'warning' })
   await resourceApi.deleteFacility(row.id); ElMessage.success('删除成功'); fetchData()
 }
-onMounted(fetchData)
+async function loadPolicies() {
+  const res = await policyApi.getPolicyList({ page: 1, size: 100 })
+  policies.value = (res.records || []).filter((p: any) => p.resourceType === 'FACILITY')
+}
+onMounted(() => { fetchData(); loadPolicies() })
 </script>
 
 <style scoped lang="scss">
