@@ -19,9 +19,9 @@ class ReservationValidatorTest {
     void acceptsAdjacentReservationsWhenBothBoundariesAlignToThePolicySlot() {
         Instant start = Instant.parse("2026-07-22T08:00:00Z");
 
-        assertThatCode(() -> validator.validate(new CreateReservationCommand(1L, start, start.plusSeconds(1800)), snapshot))
+        assertThatCode(() -> validator.validate(new CreateReservationCommand(1L, "", start, start.plusSeconds(1800)), snapshot))
                 .doesNotThrowAnyException();
-        assertThatCode(() -> validator.validate(new CreateReservationCommand(1L, start.plusSeconds(1800), start.plusSeconds(3600)), snapshot))
+        assertThatCode(() -> validator.validate(new CreateReservationCommand(1L, "", start.plusSeconds(1800), start.plusSeconds(3600)), snapshot))
                 .doesNotThrowAnyException();
     }
 
@@ -29,7 +29,7 @@ class ReservationValidatorTest {
     void rejectsTimesThatDoNotAlignToThePolicySlot() {
         Instant start = Instant.parse("2026-07-22T08:05:00Z");
 
-        assertThatThrownBy(() -> validator.validate(new CreateReservationCommand(1L, start, start.plusSeconds(1800)), snapshot))
+        assertThatThrownBy(() -> validator.validate(new CreateReservationCommand(1L, "", start, start.plusSeconds(1800)), snapshot))
                 .isInstanceOf(BusinessException.class);
     }
 
@@ -40,7 +40,7 @@ class ReservationValidatorTest {
                 new ReservationSnapshotDTO.PolicyInfo(0, 30, 30, 480, false, 0), 1L);
 
         assertThatThrownBy(() -> validator.validate(
-                new CreateReservationCommand(1L, Instant.parse("2026-07-22T08:00:00Z"),
+                new CreateReservationCommand(1L, "", Instant.parse("2026-07-22T08:00:00Z"),
                         Instant.parse("2026-07-22T08:30:00Z")), invalidPolicy))
                 .isInstanceOf(BusinessException.class);
     }
