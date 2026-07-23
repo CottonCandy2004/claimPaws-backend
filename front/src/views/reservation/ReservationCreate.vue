@@ -10,7 +10,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="选择资源" prop="resourceCascade">
-          <el-cascader v-model="form.resourceCascade" :options="campusTree"
+          <el-cascader v-model="form.resourceCascade" :options="campusTree" :key="form.resourceType"
             :props="{ value: 'id', label: 'name', children: 'children', checkStrictly: false, lazy: true, lazyLoad }"
             placeholder="选择园区 > 楼宇 > 楼层 > 资源" style="width: 100%" clearable />
         </el-form-item>
