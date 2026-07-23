@@ -37,21 +37,9 @@
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
         <el-form-item label="策略名称" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="资源类型" prop="resourceType">
-          <el-select v-model="form.resourceType" style="width: 100%" @change="onPolicyResourceTypeChange">
+          <el-select v-model="form.resourceType" style="width: 100%">
             <el-option label="会议室" value="MEETING_ROOM" /><el-option label="工位" value="WORKSTATION" /><el-option label="设施" value="FACILITY" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="适用资源">
-          <el-cascader
-            v-model="form.resourceCascade"
-            :options="resourceTree"
-            :props="{ value: 'id', label: 'name', children: 'children', multiple: true, emitPath: false, checkStrictly: false }"
-            placeholder="选择资源（留空为全局策略）"
-            style="width: 100%"
-            clearable
-            collapse-tags
-            collapse-tags-tooltip
-          />
         </el-form-item>
         <el-row :gutter="12">
           <el-col :span="12"><el-form-item label="时段粒度(min)" prop="timeSlotGranularity"><el-input-number v-model="form.timeSlotGranularity" :min="5" :step="5" /></el-form-item></el-col>
@@ -121,14 +109,11 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import type { ReservationPolicy } from '@/types'
 import * as policyApi from '@/api/modules/policy'
 import * as roleApi from '@/api/modules/role'
-import * as resourceApi from '@/api/modules/resource'
 import { usePagination } from '@/composables/usePagination'
 
 const keyword = ref('')
 const data = ref<ReservationPolicy[]>([])
 const allRoles = ref<any[]>([])
-const policyResources = ref<any[]>([])
-const resourceTree = ref<any[]>([])
 const selectedRoles = ref<any[]>([])
 const selectedRoleIds = ref<any[]>([])
 const dialogVisible = ref(false)
