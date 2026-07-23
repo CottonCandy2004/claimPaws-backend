@@ -38,7 +38,7 @@
         <el-form-item label="策略名称" prop="name"><el-input v-model="form.name" /></el-form-item>
         <el-form-item label="资源类型" prop="resourceType">
           <el-select v-model="form.resourceType" style="width: 100%" @change="onPolicyResourceTypeChange">
-            <el-option label="会议室" value="MEETING_ROOM" /><el-option label="工位" value="WORKSTATION" />
+            <el-option label="会议室" value="MEETING_ROOM" /><el-option label="工位" value="WORKSTATION" /><el-option label="设施" value="FACILITY" />
           </el-select>
         </el-form-item>
         <el-form-item label="适用资源">
@@ -153,6 +153,7 @@ async function onPolicyResourceTypeChange() {
   loadResourceTree()
 }
 async function loadResourceTree() {
+  const type = form.value.resourceType === 'MEETING_ROOM' ? 'ROOM' : form.value.resourceType === 'WORKSTATION' ? 'WORKSTATION' : 'FACILITY'
   const campuses = await resourceApi.getAllCampuses()
   const tree = []
   for (const c of campuses) {
@@ -162,10 +163,9 @@ async function loadResourceTree() {
       const fls = await resourceApi.getFloorsByBuilding(b.id)
       const fchildren = []
       for (const f of fls) {
-        const resources = form.value.resourceType === 'MEETING_ROOM'
-          ? (await resourceApi.getRoomList({ page: 1, size: 1000, floorId: f.id })).records || []
-          : (await resourceApi.getWorkstationList({ page: 1, size: 1000, floorId: f.id })).records || []
-        if (resources.length > 0) fchildren.push({ ...f, children: resources.map((r: any) => ({ ...r, leaf: true })) })
+        const res = type === 'ROOM' ? (await resourceApi.getRoomList({ page: 1, size: 1000, floorId: f.id })) : (await resourceApi.getWorkstationList({ page: 1, size: 1000, floorId: f.id }))
+        const list = (res.records || []).filter((r: any) => type === 'FACILITY' ? r.type === 'FACILITY' : true)
+        if (list.length > 0) fchildren.push({ ...f, children: list.map((r: any) => ({ ...r, leaf: true })) })
       }
       if (fchildren.length > 0) bchildren.push({ ...b, children: fchildren })
     }
@@ -216,7 +216,22 @@ async function handleEdit(row: any) {
   } else {
     selectedRoles.value = []; selectedRoleIds.value = []
   }
-  Object.assign(form.value, { ...row, approvalLevel: (row.approvalLevel ?? 0) as 0 | 1 | 2, approverRoles: row.approverRoles || '' })
+  await loadResourceTree()
+  const cascade: number[] = row.resourceId && row.resourceId > 0 ? [row.resourceId] : []
+  Object.assign(form.value, {
+    name: row.name || '',
+    resourceType: row.resourceType || 'MEETING_ROOM',
+    resourceId: row.resourceId || 0,
+    timeSlotGranularity: row.slotMinutes ?? 30,
+    advanceBookingDays: row.advanceDays ?? 7,
+    minDuration: row.minDurationMinutes ?? 30,
+    maxDuration: row.maxDurationMinutes ?? 240,
+    cancelDeadline: row.cancelDeadlineMinutes ?? 60,
+    checkInWindow: row.checkInWindowMinutes ?? 15,
+    approvalLevel: (row.approvalLevel ?? 0) as 0 | 1 | 2,
+    approverRoles: row.approverRoles || row.description || '',
+    resourceCascade: cascade
+  })
   dialogKey.value++
   dialogVisible.value = true
 }
