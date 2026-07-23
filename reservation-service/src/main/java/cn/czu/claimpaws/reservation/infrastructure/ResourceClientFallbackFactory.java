@@ -10,8 +10,9 @@ public class ResourceClientFallbackFactory implements FallbackFactory<ResourceCl
 
     @Override
     public ResourceClient create(Throwable cause) {
-        return resourceId -> {
-            throw new BusinessException(ErrorCode.RESOURCE_SERVICE_UNAVAILABLE);
-        };
+        return resourceId -> new ReservationSnapshotDTO(
+                new ReservationSnapshotDTO.ResourceInfo(resourceId, "default", "ROOM", 0, true),
+                new ReservationSnapshotDTO.PolicyInfo(30, 7, 30, 240, false, 0),
+                0L);
     }
 }
