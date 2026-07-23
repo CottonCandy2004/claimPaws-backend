@@ -22,7 +22,7 @@ public class ResourceController {
     @GetMapping("/{id}/reservation-snapshot")
     public ApiResponse<ReservationSnapshot> getReservationSnapshot(
             @PathVariable long id,
-            @RequestHeader("X-Request-Id") String requestId) {
+            @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
         ReservationSnapshot snapshot = resourceService.snapshot(id);
         return ApiResponse.success(snapshot, requestId);
     }
