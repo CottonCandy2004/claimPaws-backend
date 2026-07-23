@@ -56,19 +56,18 @@
         <el-form-item label="审批模式">
           <el-radio-group v-model="form.approvalLevel">
             <el-radio :value="0">免审批</el-radio>
-            <el-radio :value="1">一级审批</el-radio>
-            <el-radio :value="2">二级审批</el-radio>
+            <el-radio :value="1">审批链</el-radio>
+            <el-radio :value="2">审批集合</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item v-if="form.approvalLevel > 0" label="审批角色(按序)">
-          <span style="font-size:12px;color:#909399">按审批顺序排列，第一个为一级审批人，以此类推</span>
+        <el-form-item v-if="form.approvalLevel === 1" label="审批链">
+          <span style="font-size:12px;color:#909399">按顺序流转，上一节点通过后下一节点才能审批，任一拒绝则整体拒绝</span>
           <div style="display:flex; gap:16px; margin-top:8px">
             <div style="flex:1">
               <div style="font-size:13px;margin-bottom:4px;font-weight:500">可选角色</div>
               <div style="border:1px solid #dcdfe6;border-radius:4px;min-height:120px;max-height:200px;overflow-y:auto;padding:4px">
                 <div v-for="r in availableRoles" :key="r.id" style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;cursor:pointer" @click="addRole(r)">
-                  <span>{{ r.name }}</span>
-                  <span style="color:#409EFF;font-size:12px">添加 →</span>
+                  <span>{{ r.name }}</span><span style="color:#409EFF;font-size:12px">添加 →</span>
                 </div>
                 <div v-if="availableRoles.length === 0" style="color:#909399;font-size:12px;text-align:center;padding:16px">无可选角色</div>
               </div>
@@ -88,6 +87,12 @@
               </div>
             </div>
           </div>
+        </el-form-item>
+        <el-form-item v-if="form.approvalLevel === 2" label="审批集合">
+          <span style="font-size:12px;color:#909399">集合内任一角色可审批，先到先得，任一拒绝则拒绝</span>
+          <el-select v-model="selectedRoleIds" multiple placeholder="选择审批角色" style="width: 100%">
+            <el-option v-for="r in allRoles" :key="r.id" :label="r.name" :value="r.id" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -110,6 +115,7 @@ const keyword = ref('')
 const data = ref<ReservationPolicy[]>([])
 const allRoles = ref<any[]>([])
 const selectedRoles = ref<any[]>([])
+const selectedRoleIds = ref<any[]>([])
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const submitting = ref(false)
@@ -125,7 +131,7 @@ const rules: FormRules = { name: [{ required: true, message: '请输入策略名
 
 const availableRoles = computed(() => allRoles.value.filter(r => !selectedRoles.value.find(s => s.id === r.id)))
 
-function approvalLabel(level: number) { return level === 0 ? '免审批' : level === 1 ? '一级审批' : '二级审批' }
+function approvalLabel(level: number) { return level === 0 ? '免审批' : level === 1 ? '审批链' : '审批集合' }
 
 async function loadRoles() {
   const res = await roleApi.getRoleList({ page: 1, size: 100 })
@@ -143,13 +149,22 @@ async function fetchData() {
 }
 function search() { resetPage(); fetchData() }
 function handleCreate() {
-  editingId.value = null; selectedRoles.value = []
+  editingId.value = null; selectedRoles.value = []; selectedRoleIds.value = []
   form.value = { name: '', resourceType: 'MEETING_ROOM', timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
   dialogVisible.value = true
 }
 function handleEdit(row: any) {
   editingId.value = row.id
-  selectedRoles.value = row.approverRoles ? row.approverRoles.split(',').map((id: string) => allRoles.value.find((r: any) => r.id === Number(id))).filter(Boolean) : []
+  const ids = row.approverRoles ? row.approverRoles.split(',').map(Number).filter(Boolean) : []
+  if ((row.approvalLevel ?? 0) === 1) {
+    selectedRoles.value = ids.map((id: number) => allRoles.value.find((r: any) => r.id === id)).filter(Boolean)
+    selectedRoleIds.value = []
+  } else if ((row.approvalLevel ?? 0) === 2) {
+    selectedRoleIds.value = ids
+    selectedRoles.value = []
+  } else {
+    selectedRoles.value = []; selectedRoleIds.value = []
+  }
   Object.assign(form.value, { ...row, approvalLevel: (row.approvalLevel ?? 0) as 0 | 1 | 2, approverRoles: row.approverRoles || '' })
   dialogVisible.value = true
 }
@@ -158,7 +173,9 @@ async function handleSubmit() {
   await formRef.value.validate(async (v) => {
     if (!v) return; submitting.value = true
     try {
-      form.value.approverRoles = selectedRoles.value.map(r => r.id).join(',')
+      form.value.approverRoles = form.value.approvalLevel === 1
+        ? selectedRoles.value.map(r => r.id).join(',')
+        : (form.value.approvalLevel === 2 ? selectedRoleIds.value.join(',') : '')
       if (editingId.value) { await policyApi.updatePolicy(editingId.value, form.value); ElMessage.success('更新成功') }
       else { await policyApi.createPolicy(form.value); ElMessage.success('创建成功') }
       dialogVisible.value = false; fetchData()
