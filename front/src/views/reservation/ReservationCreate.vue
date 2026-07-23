@@ -42,6 +42,8 @@ const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const campusTree = ref<any[]>([])
 const form = ref({ title: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceCascade: [] as number[], startTime: '', endTime: '', description: '' })
+const disabledMinute = () => Array.from({length: 60}, (_, i) => i).filter(i => i % 30 !== 0)
+const disabledSecond = () => Array.from({length: 60}, (_, i) => i)
 const rules: FormRules = {
   title: [{ required: true, message: '请输入预约标题', trigger: 'blur' }],
   resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
@@ -88,8 +90,6 @@ async function loadInitialCampuses() {
 }
 
 async function handleSubmit() {
-const disabledMinute = () => Array.from({length: 60}, (_, i) => i).filter(i => i % 30 !== 0)
-const disabledSecond = () => Array.from({length: 60}, (_, i) => i)
   if (!formRef.value) return
   await formRef.value.validate(async (v) => {
     if (!v) return; submitting.value = true
