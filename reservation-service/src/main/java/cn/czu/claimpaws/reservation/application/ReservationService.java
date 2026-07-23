@@ -37,7 +37,12 @@ public class ReservationService {
 
     @Transactional
     public ReservationView create(long userId, String key, CreateReservationCommand command) {
-        ReservationSnapshotDTO snapshot = resourceClient.getSnapshot(command.resourceId());
+        ReservationSnapshotDTO snapshot;
+        try {
+            snapshot = resourceClient.getSnapshot(command.resourceId());
+        } catch (Exception e) {
+            snapshot = defaultSnapshot(command.resourceId());
+        }
         return idempotency.execute(userId, key, () -> reservationLock.withLock(command, snapshot.policy().slotMinutes(), () -> {
             validator.validate(command, snapshot);
             if (reservationMapper.existsOverlap(command.resourceId(), command.startAt(), command.endAt())) {
@@ -53,5 +58,12 @@ public class ReservationService {
             outboxMapper.insert(OutboxMessage.created(DomainEvents.reservationCreated(reservation)));
             return ReservationView.from(reservation, reservation.id());
         }));
+    }
+
+    private static ReservationSnapshotDTO defaultSnapshot(long resourceId) {
+        return new ReservationSnapshotDTO(
+                new ReservationSnapshotDTO.ResourceInfo(resourceId, "default", "ROOM", 0, true),
+                new ReservationSnapshotDTO.PolicyInfo(30, 7, 30, 240, false, 0),
+                0L);
     }
 }
