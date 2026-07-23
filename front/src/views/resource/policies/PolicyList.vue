@@ -206,7 +206,7 @@ function handleCreate() {
 async function handleEdit(row: any) {
   if (allRoles.value.length === 0) await loadRoles()
   editingId.value = row.id
-  const ids = row.approverRoles ? row.approverRoles.split(',').map(Number).filter(Boolean) : []
+  const ids = row.description ? row.description.split(',').map(Number).filter(Boolean) : []
   if ((row.approvalLevel ?? 0) === 1) {
     selectedRoles.value = ids.map((id: number) => allRoles.value.find((r: any) => r.id === id)).filter(Boolean)
     selectedRoleIds.value = []
