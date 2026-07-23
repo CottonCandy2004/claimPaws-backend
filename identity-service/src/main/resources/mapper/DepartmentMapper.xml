@@ -3,7 +3,7 @@
 <mapper namespace="cn.czu.claimpaws.identity.persistence.DepartmentMapper">
 
     <select id="findAll" resultType="cn.czu.claimpaws.identity.domain.Department">
-        SELECT * FROM departments WHERE deleted = FALSE ORDER BY id ASC
+        SELECT * FROM departments WHERE deleted = FALSE ORDER BY sort ASC, id ASC
     </select>
 
     <select id="findById" resultType="cn.czu.claimpaws.identity.domain.Department">

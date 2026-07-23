@@ -49,7 +49,29 @@ const formRef = ref<FormInstance>()
 const form = ref<{ name: string; parentId?: number; sort: number }>({ name: '', sort: 0 })
 const rules: FormRules = { name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }] }
 
-async function fetchData() { loading.value = true; try { data.value = await deptApi.getDepartmentTree() } finally { loading.value = false } }
+async function fetchData() {
+  loading.value = true
+  try {
+    const list = await deptApi.getDepartmentTree()
+    data.value = buildTree(list)
+  } finally { loading.value = false }
+}
+function buildTree(list: any[]): any[] {
+  const map: Record<number, any> = {}
+  const roots: any[] = []
+  for (const item of list) {
+    map[item.id] = { ...item, children: [] }
+  }
+  for (const item of list) {
+    const node = map[item.id]
+    if (item.parentId && map[item.parentId]) {
+      map[item.parentId].children.push(node)
+    } else {
+      roots.push(node)
+    }
+  }
+  return roots
+}
 function handleCreate(parent?: Department | null) { editingId.value = null; form.value = { name: '', parentId: parent?.id, sort: 0 }; dialogVisible.value = true }
 function handleEdit(row: Department) { editingId.value = row.id; form.value = { name: row.name, sort: row.sort }; dialogVisible.value = true }
 async function handleSubmit() {
