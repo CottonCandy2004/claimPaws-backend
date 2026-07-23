@@ -24,9 +24,12 @@ public class ResourceService {
         if (resource == null) {
             throw new IllegalArgumentException("Resource not found or inactive: " + resourceId);
         }
-        ReservationPolicy policy = policyMapper.requireActiveByResourceId(resourceId);
+        ReservationPolicy policy = resource.policyId() != null
+                ? policyMapper.findById(resource.policyId())
+                : policyMapper.requireActiveByResourceId(resourceId);
         if (policy == null) {
-            throw new IllegalArgumentException("No active policy for resource: " + resourceId);
+            // Return default policy
+            policy = new ReservationPolicy(0L, 0L, "default", null, 30, 7, 30, 240, 60, 15, false, 0, "", true, null, null, false);
         }
         return ReservationSnapshot.from(resource, policy);
     }
