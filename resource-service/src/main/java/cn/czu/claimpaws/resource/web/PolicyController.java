@@ -84,7 +84,7 @@ public class PolicyController {
                 body.get("checkInWindow") != null ? Integer.valueOf(body.get("checkInWindow").toString()) : 15,
                 body.get("approvalLevel") != null && Integer.valueOf(body.get("approvalLevel").toString()) > 0,
                 body.get("approvalLevel") != null ? Integer.valueOf(body.get("approvalLevel").toString()) : 0,
-                (String) body.getOrDefault("description", ""),
+                (String) body.getOrDefault("approverRoles", (String) body.getOrDefault("description", "")),
                 true, null, null, null
         );
         policyMapper.insert(policy);
