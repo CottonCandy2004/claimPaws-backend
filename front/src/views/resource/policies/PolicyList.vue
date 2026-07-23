@@ -20,8 +20,8 @@
         <el-table-column label="审批" width="100">
           <template #default="{ row }">{{ approvalLabel(row.approvalLevel) }}</template>
         </el-table-column>
-        <el-table-column prop="description" label="审批角色" width="120">
-          <template #default="{ row }">{{ row.description || '-' }}</template>
+        <el-table-column prop="description" label="审批角色" width="150">
+          <template #default="{ row }">{{ roleNames(row.description) || '-' }}</template>
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="{ row }">
@@ -132,6 +132,10 @@ const rules: FormRules = { name: [{ required: true, message: '请输入策略名
 const availableRoles = computed(() => allRoles.value.filter(r => !selectedRoles.value.find(s => s.id === r.id)))
 
 function approvalLabel(level: number) { return level === 0 ? '免审批' : level === 1 ? '审批链' : '审批集合' }
+function roleNames(ids: string): string {
+  if (!ids) return ''
+  return ids.split(',').map(id => allRoles.value.find((r: any) => r.id === Number(id))?.name).filter(Boolean).join(', ')
+}
 
 async function loadRoles() {
   const res = await roleApi.getRoleList({ page: 1, size: 100 })
