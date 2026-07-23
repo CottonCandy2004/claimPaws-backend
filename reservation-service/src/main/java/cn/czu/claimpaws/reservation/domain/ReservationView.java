@@ -18,7 +18,7 @@ public record ReservationView(
                 reservation.resourceId(),
                 reservation.resourceName(),
                 reservation.resourceType(),
-                reservation.resourceName(),
+                reservation.title() != null ? reservation.title() : reservation.resourceName(),
                 reservation.startAt(),
                 reservation.endAt(),
                 reservation.status().name()

@@ -12,6 +12,7 @@ public final class Reservation {
     private final long resourceId;
     private final String resourceName;
     private final String resourceType;
+    private final String title;
     private final Instant startAt;
     private final Instant endAt;
     private final ReservationStatus status;
@@ -20,13 +21,14 @@ public final class Reservation {
     private final LocalDateTime updatedAt;
 
     public Reservation(long id, long userId, long resourceId, String resourceName, String resourceType,
-                       Instant startAt, Instant endAt, ReservationStatus status, int approvalLevel,
+                       String title, Instant startAt, Instant endAt, ReservationStatus status, int approvalLevel,
                        LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
         this.resourceId = resourceId;
         this.resourceName = resourceName;
         this.resourceType = resourceType;
+        this.title = title;
         this.startAt = startAt;
         this.endAt = endAt;
         this.status = status;
@@ -42,6 +44,7 @@ public final class Reservation {
     public long resourceId() { return resourceId; }
     public String resourceName() { return resourceName; }
     public String resourceType() { return resourceType; }
+    public String title() { return title; }
     public Instant startAt() { return startAt; }
     public Instant endAt() { return endAt; }
     public ReservationStatus status() { return status; }
@@ -54,9 +57,10 @@ public final class Reservation {
         return new Reservation(
                 0L,
                 userId,
-                 command.resourceId(),
-                 snapshot.resource().name(),
-                 snapshot.resource().type(),
+                command.resourceId(),
+                snapshot.resource().name(),
+                snapshot.resource().type(),
+                command.title() != null ? command.title() : "",
                 command.startAt(),
                 command.endAt(),
                 ReservationStatus.PENDING_APPROVAL,
