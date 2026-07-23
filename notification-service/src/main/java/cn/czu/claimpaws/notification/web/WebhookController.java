@@ -125,7 +125,7 @@ public class WebhookController {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         NotificationDelivery delivery = new NotificationDelivery(
                 null, config.id(), UUID.randomUUID().toString(), "test.delivery",
-                testPayload, config.endpointUrl(), "PENDING", 0, null, now, null, null, null, null);
+                testPayload, config.endpointUrl(), "PENDING", 0, now, now, null, null, null, null);
         deliveryMapper.insert(delivery);
         return ApiResponse.success(Map.of("message", "Test delivery queued"), requestId);
     }
