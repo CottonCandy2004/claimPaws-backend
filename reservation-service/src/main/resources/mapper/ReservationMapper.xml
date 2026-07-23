@@ -94,7 +94,7 @@
         WHERE id = #{id} AND deleted = FALSE
     </update>
 
-    <delete id="deleteOccupiedSlots">
-        DELETE FROM reservation_occupied_slots WHERE reservation_id = #{reservationId}
-    </delete>
+    <update id="deleteOccupiedSlots">
+        UPDATE reservation_occupied_slots SET deleted = TRUE WHERE reservation_id = #{reservationId} AND deleted = FALSE
+    </update>
 </mapper>
