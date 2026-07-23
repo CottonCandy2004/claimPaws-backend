@@ -109,6 +109,7 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import type { ReservationPolicy } from '@/types'
 import * as policyApi from '@/api/modules/policy'
 import * as roleApi from '@/api/modules/role'
+import * as resourceApi from '@/api/modules/resource'
 import { usePagination } from '@/composables/usePagination'
 
 const keyword = ref('')
