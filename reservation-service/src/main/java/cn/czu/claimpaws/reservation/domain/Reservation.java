@@ -55,7 +55,7 @@ public final class Reservation {
                 0L,
                 userId,
                  command.resourceId(),
-                 command.title() != null && !command.title().isBlank() ? command.title() : snapshot.resource().name(),
+                 snapshot.resource().name(),
                  snapshot.resource().type(),
                 command.startAt(),
                 command.endAt(),
