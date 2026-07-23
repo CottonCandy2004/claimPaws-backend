@@ -48,7 +48,7 @@ class OutboxPublishJobTest {
         @Override public OutboxMessage findByAggregateId(long aggregateId) { return null; }
         @Override public List<OutboxMessage> findClaimCandidates() { return List.of(pendingMessage()); }
         @Override public int claim(Long id, String owner, LocalDateTime lockedUntil) { return claimResult; }
-        @Override public int updateStatus(long id, String status, Boolean deleted) { this.status = status; return 1; }
+        @Override public int updateStatus(Long id, String owner, String status) { this.status = status; return 1; }
         @Override public int releaseClaim(Long id, String owner) { this.status = "PENDING"; return 1; }
     }
 
