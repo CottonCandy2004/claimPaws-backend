@@ -216,6 +216,8 @@ async function handleEdit(row: any) {
   } else {
     selectedRoles.value = []; selectedRoleIds.value = []
   }
+  // Set resourceType first so loadResourceTree filters correctly
+  form.value.resourceType = (row.resourceType || 'MEETING_ROOM') as 'MEETING_ROOM' | 'WORKSTATION'
   await loadResourceTree()
   const cascade: number[] = row.resourceId && row.resourceId > 0 ? [row.resourceId] : []
   Object.assign(form.value, {
