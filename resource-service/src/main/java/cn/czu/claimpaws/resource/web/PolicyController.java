@@ -3,16 +3,8 @@ package cn.czu.claimpaws.resource.web;
 import cn.czu.claimpaws.common.api.ApiResponse;
 import cn.czu.claimpaws.resource.domain.ReservationPolicy;
 import cn.czu.claimpaws.resource.persistence.PolicyMapper;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import cn.czu.claimpaws.resource.persistence.ResourceMapper;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +15,11 @@ import java.util.Map;
 public class PolicyController {
 
     private final PolicyMapper policyMapper;
+    private final ResourceMapper resourceMapper;
 
-    public PolicyController(PolicyMapper policyMapper) {
+    public PolicyController(PolicyMapper policyMapper, ResourceMapper resourceMapper) {
         this.policyMapper = policyMapper;
+        this.resourceMapper = resourceMapper;
     }
 
     @GetMapping
@@ -89,7 +83,19 @@ public class PolicyController {
                 true, null, null, null
         );
         policyMapper.insert(policy);
+        updateResourcePolicyIds(body, policy.id());
         return ApiResponse.success(policy, requestId);
+    }
+
+    private void updateResourcePolicyIds(Map<String, Object> body, Long policyId) {
+        Object ids = body.get("resourceIds");
+        if (ids instanceof List<?> list && !list.isEmpty()) {
+            for (Object id : list) {
+                if (id instanceof Number) {
+                    resourceMapper.updatePolicyId(((Number) id).longValue(), policyId);
+                }
+            }
+        }
     }
 
     @PutMapping("/{id}")
@@ -118,6 +124,7 @@ public class PolicyController {
                 existing.active(), null, null, existing.deleted()
         );
         policyMapper.update(toUpdate);
+        updateResourcePolicyIds(body, id);
         ReservationPolicy updated = policyMapper.findById(id);
         return ApiResponse.success(updated, requestId);
     }

@@ -106,6 +106,11 @@
         WHERE id = #{id} AND deleted = FALSE
     </update>
 
+    <update id="updatePolicyId">
+        UPDATE resources SET policy_id = #{policyId}, updated_at = NOW()
+        WHERE id = #{id} AND deleted = FALSE
+    </update>
+
     <select id="countByBuildingName" resultType="long">
         SELECT COUNT(*) FROM resources
         WHERE type = 'FLOOR' AND deleted = FALSE AND building = #{buildingName}

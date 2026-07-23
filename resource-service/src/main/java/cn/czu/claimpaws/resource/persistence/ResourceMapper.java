@@ -28,4 +28,5 @@ public interface ResourceMapper {
     int update(Resource resource);
 
     int deleteById(@Param("id") long id);
+    int updatePolicyId(@Param("id") long id, @Param("policyId") Long policyId);
 }

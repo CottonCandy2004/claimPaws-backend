@@ -228,6 +228,7 @@ async function handleSubmit() {
     if (!v) return; submitting.value = true
     try {
       form.value.resourceId = form.value.resourceCascade.length > 0 ? form.value.resourceCascade[0] : 0
+      form.value.resourceIds = form.value.resourceCascade
       form.value.approverRoles = form.value.approvalLevel === 1
         ? selectedRoles.value.map(r => r.id).join(',')
         : (form.value.approvalLevel === 2 ? selectedRoleIds.value.join(',') : '')
