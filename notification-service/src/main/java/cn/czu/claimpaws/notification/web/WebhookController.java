@@ -47,7 +47,7 @@ public class WebhookController {
         List<WebhookConfig> configs = webhookConfigMapper.findPage(offset, size);
         long total = webhookConfigMapper.count();
         List<Map<String, Object>> items = configs.stream().map(this::toFrontendMap).toList();
-        return ApiResponse.success(Map.of("items", items, "total", total, "page", page, "size", size), requestId);
+        return ApiResponse.success(Map.of("records", items, "total", total, "page", page, "size", size), requestId);
     }
 
     @GetMapping("/{id}")
@@ -140,7 +140,7 @@ public class WebhookController {
         int offset = (page - 1) * size;
         List<Map<String, Object>> items = deliveryMapper.findAuditPage(offset, size, webhookId, status);
         long total = deliveryMapper.countAudits(webhookId, status);
-        return ApiResponse.success(Map.of("items", items, "total", total, "page", page, "size", size), requestId);
+        return ApiResponse.success(Map.of("records", items, "total", total, "page", page, "size", size), requestId);
     }
 
     @PostMapping("/delivery-audits/{id}/retry")
