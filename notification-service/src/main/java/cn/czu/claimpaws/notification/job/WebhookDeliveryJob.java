@@ -47,8 +47,12 @@ public class WebhookDeliveryJob {
         String timestamp = now.toInstant(ZoneOffset.UTC).toString();
         try {
             var endpoint = webhookEndpointService.resolveForDelivery(task.endpointUrl());
+            String secret = task.encryptedSecret();
+            String signature = secret != null && !secret.isEmpty()
+                    ? signatureService.sign(secretCipher.decrypt(secret), timestamp, task.payload())
+                    : "";
             var response = httpClient.post(endpoint, task.eventId(), task.eventType(), timestamp,
-                    signatureService.sign(secretCipher.decrypt(task.encryptedSecret()), timestamp, task.payload()), task.payload());
+                    signature, task.payload());
             if (response.isSuccessful()) {
                 webhookDeliveryService.markSucceeded(task.id(), now, response.statusCode());
             } else {
