@@ -299,7 +299,7 @@ public class ResourcePublicController {
                 body.get("capacity") != null ? ((Number) body.get("capacity")).intValue()
                         : (existing.capacity() != null ? existing.capacity() : 0),
                 desc,
-                body.containsKey("policyId") ? (Long) body.get("policyId") : existing.policyId(),
+                body.containsKey("policyId") && body.get("policyId") != null ? Long.valueOf(body.get("policyId").toString()) : existing.policyId(),
                 existing.active(), null, null, existing.deleted());
         resourceMapper.update(toUpdate);
         return ApiResponse.success(resourceMapper.findById(id), requestId);
