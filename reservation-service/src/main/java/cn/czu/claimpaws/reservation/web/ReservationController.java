@@ -88,6 +88,7 @@ public class ReservationController {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
         reservationMapper.updateStatus(id, ReservationStatus.CANCELLED.name());
+        reservationMapper.deleteOccupiedSlots(id);
         Reservation updated = reservationMapper.findById(id);
         return ApiResponse.success(ReservationView.from(updated, 0), requestId);
     }
