@@ -159,7 +159,8 @@ function handleCreate() {
   form.value = { name: '', resourceType: 'MEETING_ROOM', timeSlotGranularity: 30, advanceBookingDays: 7, minDuration: 30, maxDuration: 240, cancelDeadline: 60, checkInWindow: 15, noShowPenalty: 0, approvalLevel: 0 as 0 | 1 | 2, approverRoles: '' }
   dialogVisible.value = true
 }
-function handleEdit(row: any) {
+async function handleEdit(row: any) {
+  if (allRoles.value.length === 0) await loadRoles()
   editingId.value = row.id
   const ids = row.approverRoles ? row.approverRoles.split(',').map(Number).filter(Boolean) : []
   if ((row.approvalLevel ?? 0) === 1) {
