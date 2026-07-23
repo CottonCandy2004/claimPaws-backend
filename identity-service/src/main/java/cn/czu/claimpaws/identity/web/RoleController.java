@@ -21,10 +21,16 @@ public class RoleController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Role>>> list(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
         String requestId = request.getHeader("X-Request-Id");
         List<Role> roles = roleMapper.findAll();
-        return ResponseEntity.ok(ApiResponse.success(roles, requestId));
+        int start = (page - 1) * size;
+        int end = Math.min(start + size, roles.size());
+        var body = Map.<String, Object>of("records", roles.subList(Math.min(start, roles.size()), end), "total", roles.size(), "page", page, "size", size);
+        return ResponseEntity.ok(ApiResponse.success(body, requestId));
     }
 
     @GetMapping("/{id}")
