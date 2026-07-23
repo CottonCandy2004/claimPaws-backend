@@ -28,7 +28,9 @@
         </el-form-item>
         </el-form-item>
         <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" :disabled-minutes="disabledMinute" :disabled-seconds="disabledSecond" />
+          <el-date-picker v-model="form.endDate" type="date" placeholder="日期" style="width: 100%" value-format="YYYY-MM-DD" />
+            <el-time-select v-model="form.endTime" placeholder="时间" start="00:00" end="23:30" step="00:30" style="width: 160px" />
+          </div>
         </el-form-item>
         <el-form-item label="描述"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
         <el-form-item>
