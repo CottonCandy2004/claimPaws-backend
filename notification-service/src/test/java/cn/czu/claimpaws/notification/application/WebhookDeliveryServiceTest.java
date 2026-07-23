@@ -32,10 +32,18 @@ class WebhookDeliveryServiceTest {
         @Override public void markSucceeded(long id, LocalDateTime attemptedAt, int responseStatus) { }
         @Override public void markRetry(long id, int retryCount, LocalDateTime attemptedAt, LocalDateTime nextAttemptAt, Integer responseStatus, String failureReason) { }
         @Override public void markFailed(long id, int retryCount, LocalDateTime attemptedAt, Integer responseStatus, String failureReason) { }
+        @Override public int resetForRetry(long id) { return 0; }
+        @Override public List<java.util.Map<String, Object>> findAuditPage(int offset, int limit) { return List.of(); }
+        @Override public long countAudits() { return 0; }
     }
 
     private static final class NoopWebhookConfigMapper implements WebhookConfigMapper {
         @Override public List<cn.czu.claimpaws.notification.domain.WebhookConfig> findEnabled() { return List.of(); }
-        @Override public void insert(String endpointUrl, String encryptedSecret) { }
+        @Override public void insert(String endpointUrl, String encryptedSecret, boolean enabled) { }
+        @Override public List<cn.czu.claimpaws.notification.domain.WebhookConfig> findPage(int offset, int limit) { return List.of(); }
+        @Override public long count() { return 0; }
+        @Override public cn.czu.claimpaws.notification.domain.WebhookConfig findById(long id) { return null; }
+        @Override public int update(String endpointUrl, String encryptedSecret, boolean enabled, long id) { return 0; }
+        @Override public int deleteById(long id) { return 0; }
     }
 }

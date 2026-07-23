@@ -22,6 +22,11 @@ class WebhookEndpointPinningTest {
 
     private static final class NoopWebhookConfigMapper implements WebhookConfigMapper {
         @Override public java.util.List<cn.czu.claimpaws.notification.domain.WebhookConfig> findEnabled() { return java.util.List.of(); }
-        @Override public void insert(String endpointUrl, String encryptedSecret) { }
+        @Override public void insert(String endpointUrl, String encryptedSecret, boolean enabled) { }
+        @Override public java.util.List<cn.czu.claimpaws.notification.domain.WebhookConfig> findPage(int offset, int limit) { return java.util.List.of(); }
+        @Override public long count() { return 0; }
+        @Override public cn.czu.claimpaws.notification.domain.WebhookConfig findById(long id) { return null; }
+        @Override public int update(String endpointUrl, String encryptedSecret, boolean enabled, long id) { return 0; }
+        @Override public int deleteById(long id) { return 0; }
     }
 }
