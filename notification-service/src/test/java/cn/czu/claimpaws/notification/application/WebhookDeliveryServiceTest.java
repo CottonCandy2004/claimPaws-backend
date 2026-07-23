@@ -33,7 +33,7 @@ class WebhookDeliveryServiceTest {
         @Override public void markRetry(long id, int retryCount, LocalDateTime attemptedAt, LocalDateTime nextAttemptAt, Integer responseStatus, String failureReason) { }
         @Override public void markFailed(long id, int retryCount, LocalDateTime attemptedAt, Integer responseStatus, String failureReason) { }
         @Override public int resetForRetry(long id) { return 0; }
-        @Override public List<java.util.Map<String, Object>> findAuditPage(int offset, int limit) { return List.of(); }
+        @Override public List<java.util.Map<String, Object>> findAuditPage(int offset, int limit, Long webhookId, String status) { return List.of(); }
         @Override public long countAudits(Long webhookId, String status) { return 0; }
     }
 
