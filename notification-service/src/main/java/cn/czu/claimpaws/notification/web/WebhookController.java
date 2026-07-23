@@ -70,11 +70,7 @@ public class WebhookController {
         if (url == null || url.isBlank()) {
             return ApiResponse.failure("INVALID_REQUEST", "url is required", requestId);
         }
-        if (secret == null || secret.isBlank()) {
-            return ApiResponse.failure("INVALID_REQUEST", "secret is required", requestId);
-        }
-
-        String encrypted = secretCipher.encrypt(secret);
+        String encrypted = secret != null && !secret.isBlank() ? secretCipher.encrypt(secret) : "";
         webhookConfigMapper.insert(url, encrypted, enabled);
         return ApiResponse.success(Map.of("message", "Webhook created"), requestId);
     }
