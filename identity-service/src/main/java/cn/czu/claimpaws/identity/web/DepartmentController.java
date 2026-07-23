@@ -51,7 +51,9 @@ public class DepartmentController {
         Long parentId = body.get("parentId") != null
                 ? ((Number) body.get("parentId")).longValue()
                 : null;
-        Department dept = new Department(null, name, parentId, null, null, false);
+        Department dept = new Department(null, name, parentId,
+                body.get("sort") != null ? ((Number) body.get("sort")).intValue() : 0,
+                null, null, false);
         departmentMapper.insert(dept);
         return ResponseEntity.ok(ApiResponse.success(dept, requestId));
     }
@@ -70,6 +72,7 @@ public class DepartmentController {
                 id,
                 body.containsKey("name") ? (String) body.get("name") : existing.name(),
                 body.containsKey("parentId") ? ((Number) body.get("parentId")).longValue() : existing.parentId(),
+                body.get("sort") != null ? ((Number) body.get("sort")).intValue() : (existing.sort() != null ? existing.sort() : 0),
                 existing.createdAt(),
                 null,
                 existing.deleted()

@@ -11,8 +11,8 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-        INSERT INTO departments (name, parent_id, created_at, updated_at)
-        VALUES (#{name}, #{parentId}, NOW(), NOW())
+        INSERT INTO departments (name, parent_id, sort, created_at, updated_at)
+        VALUES (#{name}, #{parentId}, #{sort}, NOW(), NOW())
     </insert>
 
     <update id="update">
@@ -20,6 +20,7 @@
         <set>
             <if test="name != null">name = #{name},</if>
             <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="sort != null">sort = #{sort},</if>
             updated_at = NOW()
         </set>
         WHERE id = #{id} AND deleted = FALSE

@@ -6,6 +6,7 @@ public record Department(
         Long id,
         String name,
         Long parentId,
+        Integer sort,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         Boolean deleted
