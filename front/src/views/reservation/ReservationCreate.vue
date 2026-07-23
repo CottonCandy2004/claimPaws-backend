@@ -15,10 +15,10 @@
             placeholder="选择园区 > 楼宇 > 楼层 > 资源" style="width: 100%" clearable />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
-          <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
+          <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" :disabled-minutes="disabledMinute" :disabled-seconds="disabledSecond" />
         </el-form-item>
         <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" />
+          <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" value-format="YYYY-MM-DD HH:mm:ss" :disabled-minutes="disabledMinute" :disabled-seconds="disabledSecond" />
         </el-form-item>
         <el-form-item label="描述"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
         <el-form-item>
@@ -88,6 +88,8 @@ async function loadInitialCampuses() {
 }
 
 async function handleSubmit() {
+const disabledMinute = () => Array.from({length: 60}, (_, i) => i).filter(i => i % 30 !== 0)
+const disabledSecond = () => Array.from({length: 60}, (_, i) => i)
   if (!formRef.value) return
   await formRef.value.validate(async (v) => {
     if (!v) return; submitting.value = true

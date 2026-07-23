@@ -66,7 +66,7 @@ public class ReservationService {
     private static ReservationSnapshotDTO defaultSnapshot(long resourceId) {
         return new ReservationSnapshotDTO(
                 new ReservationSnapshotDTO.ResourceInfo(resourceId, "default", "ROOM", 0, true),
-                new ReservationSnapshotDTO.PolicyInfo(1, 7, 30, 240, false, 0),
+                new ReservationSnapshotDTO.PolicyInfo(30, 7, 30, 240, false, 0),
                 0L);
     }
 }
