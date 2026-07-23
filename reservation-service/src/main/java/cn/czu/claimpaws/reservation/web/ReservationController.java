@@ -74,7 +74,8 @@ public class ReservationController {
             @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
         String key = idempotencyKey != null ? idempotencyKey : UUID.randomUUID().toString();
         CreateReservationCommand command = new CreateReservationCommand(
-                body.resourceId, Instant.parse(body.startTime.replace(" ", "T") + "Z"), Instant.parse(body.endTime.replace(" ", "T") + "Z"));
+                body.resourceId, body.title != null ? body.title : "",
+                Instant.parse(body.startTime.replace(" ", "T") + "Z"), Instant.parse(body.endTime.replace(" ", "T") + "Z"));
         return ApiResponse.success(reservationService.create(userId, key, command), requestId);
     }
 

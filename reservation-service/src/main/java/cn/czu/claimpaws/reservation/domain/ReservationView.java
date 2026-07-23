@@ -7,6 +7,7 @@ public record ReservationView(
         long resourceId,
         String resourceName,
         String resourceType,
+        String title,
         Instant startAt,
         Instant endAt,
         String status
@@ -17,6 +18,7 @@ public record ReservationView(
                 reservation.resourceId(),
                 reservation.resourceName(),
                 reservation.resourceType(),
+                reservation.resourceName(),
                 reservation.startAt(),
                 reservation.endAt(),
                 reservation.status().name()
