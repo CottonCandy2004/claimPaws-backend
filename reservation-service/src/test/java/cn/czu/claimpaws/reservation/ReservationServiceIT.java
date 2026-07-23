@@ -88,7 +88,7 @@ class ReservationServiceIT {
         );
 
         Instant start = Instant.parse("2026-07-21T08:00:00Z");
-        var command = new CreateReservationCommand(1L, start, start.plusSeconds(3600));
+        var command = new CreateReservationCommand(1L, "", start, start.plusSeconds(3600));
         var created = reservationService.create(1L, "key-1", command);
 
         assertThat(reservationMapper.count()).isEqualTo(1);
@@ -106,10 +106,10 @@ class ReservationServiceIT {
                 )
         );
         Instant start = Instant.parse("2026-07-21T08:00:00Z");
-        reservationService.create(1L, "key-overlap-a", new CreateReservationCommand(1L, start, start.plusSeconds(3600)));
+        reservationService.create(1L, "key-overlap-a", new CreateReservationCommand(1L, "", start, start.plusSeconds(3600)));
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> reservationService.create(
-                2L, "key-overlap-b", new CreateReservationCommand(1L, start.plusSeconds(1800), start.plusSeconds(5400))))
+                2L, "key-overlap-b", new CreateReservationCommand(1L, "", start.plusSeconds(1800), start.plusSeconds(5400))))
                 .isInstanceOfSatisfying(cn.czu.claimpaws.common.exception.BusinessException.class,
                         exception -> assertThat(exception.getErrorCode())
                                 .isEqualTo(cn.czu.claimpaws.common.exception.ErrorCode.RESERVATION_TIME_CONFLICT));
@@ -122,7 +122,7 @@ class ReservationServiceIT {
                         new ReservationSnapshotDTO.ResourceInfo(1L, "会议室A", "MEETING_ROOM", 10, true),
                         new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0), System.currentTimeMillis()));
         Instant start = Instant.parse("2026-07-23T08:00:00Z");
-        var command = new CreateReservationCommand(1L, start, start.plusSeconds(3600));
+        var command = new CreateReservationCommand(1L, "", start, start.plusSeconds(3600));
 
         var first = reservationService.create(1L, "retryable-key", command);
         var retry = reservationService.create(1L, "retryable-key", command);
@@ -157,7 +157,7 @@ class ReservationServiceIT {
         ready.countDown();
         go.await();
         try {
-            reservationService.create(userId, key, new CreateReservationCommand(1L, start, start.plusSeconds(3600)));
+            reservationService.create(userId, key, new CreateReservationCommand(1L, "", start, start.plusSeconds(3600)));
             return true;
         } catch (cn.czu.claimpaws.common.exception.BusinessException expected) {
             return false;
