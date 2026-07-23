@@ -54,9 +54,9 @@ public final class Reservation {
         return new Reservation(
                 0L,
                 userId,
-                command.resourceId(),
-                snapshot.resource().name(),
-                snapshot.resource().type(),
+                 command.resourceId(),
+                 command.title() != null && !command.title().isBlank() ? command.title() : snapshot.resource().name(),
+                 snapshot.resource().type(),
                 command.startAt(),
                 command.endAt(),
                 ReservationStatus.PENDING_APPROVAL,
