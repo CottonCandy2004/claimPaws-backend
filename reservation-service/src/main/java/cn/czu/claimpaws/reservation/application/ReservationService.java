@@ -13,9 +13,13 @@ import cn.czu.claimpaws.reservation.persistence.ReservationMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.dao.DuplicateKeyException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class ReservationService {
+
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
 
     private final ResourceClient resourceClient;
     private final ReservationMapper reservationMapper;
@@ -59,6 +63,7 @@ public class ReservationService {
         try {
             return resourceClient.getSnapshot(resourceId);
         } catch (Exception e) {
+            log.warn("Failed to get snapshot for resource {}: {}, using default", resourceId, e.getMessage());
             return defaultSnapshot(resourceId);
         }
     }
