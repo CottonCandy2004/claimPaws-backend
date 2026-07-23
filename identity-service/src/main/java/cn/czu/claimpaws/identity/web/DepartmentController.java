@@ -71,7 +71,7 @@ public class DepartmentController {
         Department updated = new Department(
                 id,
                 body.containsKey("name") ? (String) body.get("name") : existing.name(),
-                body.containsKey("parentId") ? ((Number) body.get("parentId")).longValue() : existing.parentId(),
+                body.containsKey("parentId") && body.get("parentId") != null ? ((Number) body.get("parentId")).longValue() : existing.parentId(),
                 body.get("sort") != null ? ((Number) body.get("sort")).intValue() : (existing.sort() != null ? existing.sort() : 0),
                 existing.createdAt(),
                 null,
