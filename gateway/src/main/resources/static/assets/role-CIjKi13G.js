@@ -1,1 +1,0 @@
-import{K as o,M as r,N as s,L as n}from"./index-C-JEPa0l.js";function a(e){return o("/roles",e)}function l(e){return s("/roles",e)}function c(e,t){return r(`/roles/${e}`,t)}function i(e){return n(`/roles/${e}`)}export{l as c,i as d,a as g,c as u};

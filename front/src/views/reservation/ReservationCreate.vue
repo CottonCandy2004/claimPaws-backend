@@ -26,7 +26,6 @@
             <el-time-select v-model="form.endTime" placeholder="时间" start="00:00" end="23:30" step="00:30" style="width: 160px" />
           </div>
         </el-form-item>
-        <el-form-item label="描述"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="submitting" @click="handleSubmit">提交预约</el-button>
           <el-button @click="$router.back()">取消</el-button>
@@ -47,7 +46,7 @@ const router = useRouter()
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const campusTree = ref<any[]>([])
-const form = ref({ title: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceCascade: [] as number[], startDate: '', startTime: '00:00', endDate: '', endTime: '00:30', description: '' })
+const form = ref({ title: '', resourceType: 'MEETING_ROOM' as 'MEETING_ROOM' | 'WORKSTATION', resourceCascade: [] as number[], startDate: '', startTime: '00:00', endDate: '', endTime: '00:30' })
 const rules: FormRules = {
   title: [{ required: true, message: '请输入预约标题', trigger: 'blur' }],
   resourceType: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
@@ -102,7 +101,6 @@ async function handleSubmit() {
       await reservationApi.createReservation({
         resourceId: cascade[cascade.length - 1],
         title: form.value.title,
-        description: form.value.description,
         startTime: form.value.startDate + ' ' + form.value.startTime + ':00',
         endTime: form.value.endDate + ' ' + form.value.endTime + ':00',
         attendees: []
