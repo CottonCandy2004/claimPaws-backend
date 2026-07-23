@@ -68,10 +68,15 @@ public class DepartmentController {
         if (existing == null) {
             return ResponseEntity.ok(ApiResponse.failure("NOT_FOUND", "Department not found", requestId));
         }
+        Long newParentId = existing.parentId();
+        if (body.containsKey("parentId")) {
+            Object p = body.get("parentId");
+            newParentId = p != null ? ((Number) p).longValue() : null;
+        }
         Department updated = new Department(
                 id,
                 body.containsKey("name") ? (String) body.get("name") : existing.name(),
-                body.containsKey("parentId") && body.get("parentId") != null ? ((Number) body.get("parentId")).longValue() : existing.parentId(),
+                newParentId,
                 body.get("sort") != null ? ((Number) body.get("sort")).intValue() : (existing.sort() != null ? existing.sort() : 0),
                 existing.createdAt(),
                 null,
