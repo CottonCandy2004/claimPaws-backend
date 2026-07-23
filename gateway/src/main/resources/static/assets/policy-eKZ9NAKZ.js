@@ -1,0 +1,1 @@
+import{K as t,L as o,M as c,N as s}from"./index-Blxyf8yo.js";function r(e){return t("/policies",e)}function u(e){return s("/policies",e)}function a(e,i){return c(`/policies/${e}`,i)}function l(e){return o(`/policies/${e}`)}export{u as c,l as d,r as g,a as u};
