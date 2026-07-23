@@ -112,6 +112,7 @@ public class ReservationController {
 
     record CreateRequest(
             long resourceId,
+            String title,
             @JsonProperty("startTime") String startTime,
             @JsonProperty("endTime") String endTime) {}
 }
