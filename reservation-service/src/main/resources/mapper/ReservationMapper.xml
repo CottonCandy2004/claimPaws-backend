@@ -91,7 +91,6 @@
     <update id="updateStatus">
         UPDATE reservations
         SET status = #{status}, updated_at = NOW()
-        <if test="deleted != null">, deleted = #{deleted}</if>
         WHERE id = #{id} AND deleted = FALSE
     </update>
 

@@ -43,7 +43,7 @@ public class ApprovalController {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
         String newStatus = body.approved ? ReservationStatus.CONFIRMED.name() : ReservationStatus.REJECTED.name();
-        reservationMapper.updateStatus(id, newStatus, null);
+        reservationMapper.updateStatus(id, newStatus);
         Reservation updated = reservationMapper.findById(id);
         return ApiResponse.success(ReservationView.from(updated, 0), requestId);
     }
