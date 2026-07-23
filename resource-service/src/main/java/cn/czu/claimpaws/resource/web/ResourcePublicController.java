@@ -201,6 +201,7 @@ public class ResourcePublicController {
             m.put("capacity", r.capacity());
             m.put("description", r.description());
             m.put("active", r.active());
+            m.put("policyId", r.policyId());
             m.put("createdAt", r.createdAt() != null ? r.createdAt().toString() : null);
             m.put("updatedAt", r.updatedAt() != null ? r.updatedAt().toString() : null);
             if ("CAMPUS".equals(type)) m.put("address", r.description());
@@ -248,7 +249,8 @@ public class ResourcePublicController {
                 : (String) body.getOrDefault("description", "");
         Integer capacity = body.get("capacity") != null ? ((Number) body.get("capacity")).intValue() : null;
         Resource resource = new Resource(null, name, type, floor, building,
-                capacity, desc, true, null, null, false);
+                capacity, desc, body.get("policyId") != null ? Long.valueOf(body.get("policyId").toString()) : null,
+                true, null, null, false);
         resourceMapper.insert(resource);
         return ApiResponse.success(resource, requestId);
     }
@@ -297,6 +299,7 @@ public class ResourcePublicController {
                 body.get("capacity") != null ? ((Number) body.get("capacity")).intValue()
                         : (existing.capacity() != null ? existing.capacity() : 0),
                 desc,
+                body.containsKey("policyId") ? (Long) body.get("policyId") : existing.policyId(),
                 existing.active(), null, null, existing.deleted());
         resourceMapper.update(toUpdate);
         return ApiResponse.success(resourceMapper.findById(id), requestId);

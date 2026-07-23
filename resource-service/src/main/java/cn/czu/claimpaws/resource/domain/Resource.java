@@ -10,6 +10,7 @@ public record Resource(
         String building,
         Integer capacity,
         String description,
+        Long policyId,
         Boolean active,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
