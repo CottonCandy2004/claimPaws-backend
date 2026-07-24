@@ -67,7 +67,7 @@ public final class Reservation {
                 "admin",
                 command.startAt(),
                 command.endAt(),
-                ReservationStatus.PENDING_APPROVAL,
+                snapshot.policy().requiresApproval() ? ReservationStatus.PENDING_APPROVAL : ReservationStatus.CONFIRMED,
                 approvalLevel,
                 LocalDateTime.now(),
                 LocalDateTime.now()
