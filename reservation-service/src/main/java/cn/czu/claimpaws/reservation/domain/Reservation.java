@@ -13,6 +13,7 @@ public final class Reservation {
     private final String resourceName;
     private final String resourceType;
     private final String title;
+    private final String username;
     private final Instant startAt;
     private final Instant endAt;
     private final ReservationStatus status;
@@ -21,7 +22,7 @@ public final class Reservation {
     private final LocalDateTime updatedAt;
 
     public Reservation(long id, long userId, long resourceId, String resourceName, String resourceType,
-                       String title, Instant startAt, Instant endAt, ReservationStatus status, int approvalLevel,
+                       String title, String username, Instant startAt, Instant endAt, ReservationStatus status, int approvalLevel,
                        LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
@@ -29,6 +30,7 @@ public final class Reservation {
         this.resourceName = resourceName;
         this.resourceType = resourceType;
         this.title = title;
+        this.username = username;
         this.startAt = startAt;
         this.endAt = endAt;
         this.status = status;
@@ -45,6 +47,7 @@ public final class Reservation {
     public String resourceName() { return resourceName; }
     public String resourceType() { return resourceType; }
     public String title() { return title; }
+    public String username() { return username; }
     public Instant startAt() { return startAt; }
     public Instant endAt() { return endAt; }
     public ReservationStatus status() { return status; }
@@ -61,6 +64,7 @@ public final class Reservation {
                 snapshot.resource().name(),
                 snapshot.resource().type(),
                 command.title() != null ? command.title() : "",
+                "admin",
                 command.startAt(),
                 command.endAt(),
                 ReservationStatus.PENDING_APPROVAL,

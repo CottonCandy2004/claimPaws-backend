@@ -14,8 +14,8 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO reservations (user_id, resource_id, resource_name, resource_type, title, start_at, end_at, status, approval_level)
-        VALUES (#{userId}, #{resourceId}, #{resourceName}, #{resourceType}, #{title}, #{startAt}, #{endAt}, #{status}, #{approvalLevel})
+        INSERT INTO reservations (user_id, resource_id, resource_name, resource_type, title, username, start_at, end_at, status, approval_level)
+        VALUES (#{userId}, #{resourceId}, #{resourceName}, #{resourceType}, #{title}, #{username}, #{startAt}, #{endAt}, #{status}, #{approvalLevel})
     </insert>
 
     <insert id="insertOccupiedSlots">
@@ -39,7 +39,7 @@
 
     <select id="requireById" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
         SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
-               resource_type AS resourceType, title AS title, start_at AS startAt, end_at AS endAt,
+               resource_type AS resourceType, title AS title, username AS username, start_at AS startAt, end_at AS endAt,
                status, approval_level AS approvalLevel, created_at AS createdAt, updated_at AS updatedAt
         FROM reservations
         WHERE id = #{id} AND deleted = FALSE
@@ -47,7 +47,7 @@
 
     <select id="findById" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
         SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
-               resource_type AS resourceType, title AS title, start_at AS startAt, end_at AS endAt,
+               resource_type AS resourceType, title AS title, username AS username, start_at AS startAt, end_at AS endAt,
                status, approval_level AS approvalLevel, created_at AS createdAt, updated_at AS updatedAt
         FROM reservations
         WHERE id = #{id} AND deleted = FALSE
@@ -55,7 +55,7 @@
 
     <select id="findPage" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
         SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
-               resource_type AS resourceType, title AS title, start_at AS startAt, end_at AS endAt,
+               resource_type AS resourceType, title AS title, username AS username, start_at AS startAt, end_at AS endAt,
                status, approval_level AS approvalLevel, created_at AS createdAt, updated_at AS updatedAt
         FROM reservations
         WHERE deleted = FALSE
@@ -76,7 +76,7 @@
 
     <select id="findPendingApprovals" resultType="cn.czu.claimpaws.reservation.domain.Reservation">
         SELECT id, user_id AS userId, resource_id AS resourceId, resource_name AS resourceName,
-               resource_type AS resourceType, title AS title, start_at AS startAt, end_at AS endAt,
+               resource_type AS resourceType, title AS title, username AS username, start_at AS startAt, end_at AS endAt,
                status, approval_level AS approvalLevel, created_at AS createdAt, updated_at AS updatedAt
         FROM reservations
         WHERE status = 'PENDING_APPROVAL' AND deleted = FALSE

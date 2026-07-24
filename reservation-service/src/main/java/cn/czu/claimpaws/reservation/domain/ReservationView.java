@@ -8,6 +8,7 @@ public record ReservationView(
         String resourceName,
         String resourceType,
         String title,
+        String username,
         Instant startAt,
         Instant endAt,
         String status
@@ -19,6 +20,7 @@ public record ReservationView(
                 reservation.resourceName(),
                 reservation.resourceType(),
                 reservation.title() != null ? reservation.title() : reservation.resourceName(),
+                reservation.username() != null ? reservation.username() : "admin",
                 reservation.startAt(),
                 reservation.endAt(),
                 reservation.status().name()
