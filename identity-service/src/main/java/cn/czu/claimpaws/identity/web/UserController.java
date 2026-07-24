@@ -3,6 +3,7 @@ package cn.czu.claimpaws.identity.web;
 import cn.czu.claimpaws.common.api.ApiResponse;
 import cn.czu.claimpaws.identity.domain.Department;
 import cn.czu.claimpaws.identity.domain.User;
+import cn.czu.claimpaws.identity.domain.Role;
 import cn.czu.claimpaws.identity.persistence.DepartmentMapper;
 import cn.czu.claimpaws.identity.persistence.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ public class UserController {
 
     private final UserMapper userMapper;
     private final DepartmentMapper departmentMapper;
+    private final RoleMapper roleMapper;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserController(UserMapper userMapper,
@@ -27,6 +29,7 @@ public class UserController {
                           BCryptPasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
         this.departmentMapper = departmentMapper;
+        this.roleMapper = roleMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -61,6 +64,8 @@ public class UserController {
             m.put("departmentId", u.departmentId());
             m.put("departmentName", deptMap.getOrDefault(u.departmentId(), null));
             m.put("enabled", u.enabled());
+            List<Role> roles = roleMapper.findByUserId(u.id());
+            m.put("roles", roles.stream().map(r -> Map.of("id", r.id(), "name", r.name(), "code", r.code())).toList());
             m.put("createdAt", u.createdAt());
             m.put("updatedAt", u.updatedAt());
             return m;
@@ -139,6 +144,8 @@ public class UserController {
                 false
         );
         userMapper.insert(user);
+        List<Number> roleIds = (List<Number>) body.get("roleIds");
+        if (roleIds != null) { for (Number rid : roleIds) userMapper.insertUserRole(user.id(), rid.longValue()); }
         User created = userMapper.findByUsername(username).orElse(null);
         if (created == null) {
             return ResponseEntity.ok(ApiResponse.failure("INTERNAL_ERROR", "Failed to create user", requestId));
