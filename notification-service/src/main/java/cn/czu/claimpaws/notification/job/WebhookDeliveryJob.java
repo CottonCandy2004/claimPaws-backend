@@ -44,7 +44,7 @@ public class WebhookDeliveryJob {
 
     void deliver(WebhookDeliveryTask task) {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        String timestamp = now.toInstant(ZoneOffset.UTC).toString();
+        String timestamp = String.valueOf(now.toEpochSecond(ZoneOffset.UTC));
         try {
             var endpoint = webhookEndpointService.resolveForDelivery(task.endpointUrl());
             String secret = task.encryptedSecret();
