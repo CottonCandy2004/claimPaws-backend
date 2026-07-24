@@ -5,6 +5,7 @@ import cn.czu.claimpaws.identity.domain.Department;
 import cn.czu.claimpaws.identity.domain.User;
 import cn.czu.claimpaws.identity.domain.Role;
 import cn.czu.claimpaws.identity.persistence.DepartmentMapper;
+import cn.czu.claimpaws.identity.persistence.RoleMapper;
 import cn.czu.claimpaws.identity.persistence.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ public class UserController {
 
     public UserController(UserMapper userMapper,
                           DepartmentMapper departmentMapper,
+                          RoleMapper roleMapper,
                           BCryptPasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
         this.departmentMapper = departmentMapper;
