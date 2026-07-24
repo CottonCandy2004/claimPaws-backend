@@ -19,12 +19,13 @@ public final class Reservation {
     private final ReservationStatus status;
     private final int approvalLevel;
     private final String approverRoles;
+    private final int approvedLevels;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
     public Reservation(long id, long userId, long resourceId, String resourceName, String resourceType,
                        String title, String username, Instant startAt, Instant endAt, ReservationStatus status, int approvalLevel,
-                       String approverRoles, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                       String approverRoles, int approvedLevels, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
         this.resourceId = resourceId;
@@ -37,6 +38,7 @@ public final class Reservation {
         this.status = status;
         this.approvalLevel = approvalLevel;
         this.approverRoles = approverRoles;
+        this.approvedLevels = approvedLevels;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -51,6 +53,7 @@ public final class Reservation {
     public String title() { return title; }
     public String username() { return username; }
     public String approverRoles() { return approverRoles; }
+    public int approvedLevels() { return approvedLevels; }
     public Instant startAt() { return startAt; }
     public Instant endAt() { return endAt; }
     public ReservationStatus status() { return status; }
@@ -73,6 +76,7 @@ public final class Reservation {
                 snapshot.policy().requiresApproval() ? ReservationStatus.PENDING_APPROVAL : ReservationStatus.CONFIRMED,
                 approvalLevel,
                 snapshot.policy().description() != null ? snapshot.policy().description() : "",
+                0,
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );

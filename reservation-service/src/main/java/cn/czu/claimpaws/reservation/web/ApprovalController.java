@@ -1,8 +1,6 @@
 package cn.czu.claimpaws.reservation.web;
 
 import cn.czu.claimpaws.common.api.ApiResponse;
-import cn.czu.claimpaws.common.exception.BusinessException;
-import cn.czu.claimpaws.common.exception.ErrorCode;
 import cn.czu.claimpaws.reservation.domain.Reservation;
 import cn.czu.claimpaws.reservation.domain.ReservationStatus;
 import cn.czu.claimpaws.reservation.domain.ReservationView;
@@ -40,17 +38,23 @@ public class ApprovalController {
             @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
         Reservation reservation = reservationMapper.findById(id);
         if (reservation == null) {
-            throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
+            return ApiResponse.failure("NOT_FOUND", "Reservation not found", requestId);
         }
-        String newStatus = body.approved ? ReservationStatus.CONFIRMED.name() : ReservationStatus.REJECTED.name();
-        reservationMapper.updateStatus(id, newStatus);
+        if (!body.approved) {
+            reservationMapper.updateStatus(id, ReservationStatus.REJECTED.name());
+            return ApiResponse.success(ReservationView.from(reservationMapper.findById(id), 0), requestId);
+        }
+
+        String[] roles = reservation.approverRoles().split(",");
+        int nextLevel = reservation.approvedLevels() + 1;
+        if (nextLevel >= roles.length) {
+            reservationMapper.updateStatus(id, ReservationStatus.CONFIRMED.name());
+            reservationMapper.updateApprovedLevels(id, nextLevel);
+        } else {
+            reservationMapper.updateApprovedLevels(id, nextLevel);
+        }
         Reservation updated = reservationMapper.findById(id);
         return ApiResponse.success(ReservationView.from(updated, 0), requestId);
-    }
-
-    @ExceptionHandler(BusinessException.class)
-    public ApiResponse<Void> handleBusinessException(BusinessException ex) {
-        return ApiResponse.failure(ex.getErrorCode().getCode(), ex.getMessage(), null);
     }
 
     record ApproveRequest(boolean approved, String comment) {}

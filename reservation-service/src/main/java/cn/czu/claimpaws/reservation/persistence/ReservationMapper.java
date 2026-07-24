@@ -37,5 +37,6 @@ public interface ReservationMapper {
     long countPendingApprovals();
 
     int updateStatus(@Param("id") long id, @Param("status") String status);
+    int updateApprovedLevels(@Param("id") long id, @Param("levels") int levels);
     int deleteOccupiedSlots(@Param("reservationId") long reservationId);
 }
