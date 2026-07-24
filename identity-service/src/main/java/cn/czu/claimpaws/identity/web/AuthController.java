@@ -73,7 +73,7 @@ public class AuthController {
                     List<String> permissions = roleNames.contains("admin")
                             ? new ArrayList<>(ADMIN_PERMISSIONS)
                             : List.of("reservation:read", "reservation:write");
-                    var body = new HashMap<String, Object>();
+                    Map<String, Object> body = new HashMap<>();
                     body.put("id", user.id());
                     body.put("username", user.username());
                     body.put("displayName", user.displayName() != null ? user.displayName() : user.username());
