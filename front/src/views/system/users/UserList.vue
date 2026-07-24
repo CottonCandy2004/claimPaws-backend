@@ -99,7 +99,7 @@ async function handleDelete(row: User) {
   await ElMessageBox.confirm(`确定删除用户 "${row.username}"？`, '确认删除', { type: 'warning' })
   await userApi.deleteUser(row.id); ElMessage.success('删除成功'); fetchData()
 }
-an async function loadRoleList() {
+ async function loadRoleList() {
     const res = await roleApi.getRoleList({ page: 1, size: 100 })
     roleList.value = res.records || []
   }
