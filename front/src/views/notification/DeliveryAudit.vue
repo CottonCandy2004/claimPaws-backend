@@ -4,7 +4,7 @@
       <template #header>投递审计</template>
       <el-table :data="data" v-loading="loading" stripe border>
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="webhookName" label="Webhook" />
+        <el-table-column prop="webhookId" label="Webhook ID" />
         <el-table-column prop="eventType" label="事件类型" />
         <el-table-column label="状态" width="80">
           <template #default="{ row }"><el-tag :type="row.status === 'SUCCESS' ? 'success' : row.status === 'FAILED' ? 'danger' : 'warning'">{{ row.status }}</el-tag></template>
