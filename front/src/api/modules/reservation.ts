@@ -5,6 +5,6 @@ export function getReservationList(params: PageParams & { status?: string; keywo
 export function getReservationById(id: number) { return get<Reservation>(`/reservations/${id}`) }
 export function createReservation(data: CreateReservationRequest) { return post<Reservation>('/reservations', data) }
 export function cancelReservation(id: number) { return put<void>(`/reservations/${id}/cancel`) }
-export function approveReservation(id: number, data: { approved: boolean; comment?: string }) { return put<void>(`/reservations/${id}/approve`, data) }
+export function approveReservation(id: number, data: { approved: boolean; comment?: string }) { return put<void>(`/approvals/${id}/approve`, data) }
 export function checkInReservation(id: number) { return put<void>(`/reservations/${id}/check-in`) }
 export function getPendingApprovals(params: PageParams) { return get<PageResult<Reservation>>('/reservations/pending-approvals', params) }
