@@ -82,7 +82,7 @@ class ReservationServiceIT {
         when(resourceClient.getSnapshot(anyLong())).thenReturn(
                 new ReservationSnapshotDTO(
                         new ReservationSnapshotDTO.ResourceInfo(1L, "会议室A", "MEETING_ROOM", 10, true),
-                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0),
+                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0, ""),
                         System.currentTimeMillis()
                 )
         );
@@ -101,7 +101,7 @@ class ReservationServiceIT {
         when(resourceClient.getSnapshot(anyLong())).thenReturn(
                 new ReservationSnapshotDTO(
                         new ReservationSnapshotDTO.ResourceInfo(1L, "会议室A", "MEETING_ROOM", 10, true),
-                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0),
+                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0, ""),
                         System.currentTimeMillis()
                 )
         );
@@ -120,7 +120,7 @@ class ReservationServiceIT {
         when(resourceClient.getSnapshot(anyLong())).thenReturn(
                 new ReservationSnapshotDTO(
                         new ReservationSnapshotDTO.ResourceInfo(1L, "会议室A", "MEETING_ROOM", 10, true),
-                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0), System.currentTimeMillis()));
+                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0, ""), System.currentTimeMillis()));
         Instant start = Instant.parse("2026-07-23T08:00:00Z");
         var command = new CreateReservationCommand(1L, "", start, start.plusSeconds(3600));
 
@@ -136,7 +136,7 @@ class ReservationServiceIT {
         when(resourceClient.getSnapshot(anyLong())).thenReturn(
                 new ReservationSnapshotDTO(
                         new ReservationSnapshotDTO.ResourceInfo(1L, "会议室A", "MEETING_ROOM", 10, true),
-                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0),
+                        new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0, ""),
                         System.currentTimeMillis()));
         Instant start = Instant.parse("2026-07-22T08:00:00Z");
         CountDownLatch ready = new CountDownLatch(2);
