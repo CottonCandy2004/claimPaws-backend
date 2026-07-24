@@ -15,6 +15,7 @@ public record ReservationSnapshotDTO(
     public record PolicyInfo(
             int slotMinutes, int advanceDays,
             int minDurationMinutes, int maxDurationMinutes,
-            boolean requiresApproval, int approvalLevel
+            boolean requiresApproval, int approvalLevel,
+            String description
     ) {}
 }
