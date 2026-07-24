@@ -81,7 +81,7 @@ async function fetchData() {
   finally { loading.value = false }
 }
 function search() { resetPage(); fetchData() }
-function handleCreate() { editingId.value = null; form.value = { username: '', displayName: '', email: '', phone: '', password: '', departmentId: undefined, roleIds: [] }; dialogVisible.value = true
+function handleCreate() { editingId.value = null; form.value = { username: '', displayName: '', email: '', phone: '', password: '', departmentId: undefined, roleIds: [] }; dialogVisible.value = true }
 function handleEdit(row: any) { editingId.value = row.id; form.value = { username: row.username, displayName: row.displayName, email: row.email || '', phone: row.phone || '', password: '', departmentId: row.departmentId, roleIds: (row.roles || []).map((r: any) => r.id) }; dialogVisible.value = true }
 async function handleSubmit() {
   if (!formRef.value) return
