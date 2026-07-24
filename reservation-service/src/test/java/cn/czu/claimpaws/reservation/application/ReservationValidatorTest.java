@@ -13,7 +13,7 @@ class ReservationValidatorTest {
     private final ReservationValidator validator = new ReservationValidator();
     private final ReservationSnapshotDTO snapshot = new ReservationSnapshotDTO(
             new ReservationSnapshotDTO.ResourceInfo(1L, "会议室A", "MEETING_ROOM", 10, true),
-            new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0), 1L);
+            new ReservationSnapshotDTO.PolicyInfo(30, 30, 30, 480, false, 0, ""), 1L);
 
     @Test
     void acceptsAdjacentReservationsWhenBothBoundariesAlignToThePolicySlot() {
@@ -37,7 +37,7 @@ class ReservationValidatorTest {
     void rejectsNonPositiveSlotsBeforeAnyLockSlotCalculation() {
         ReservationSnapshotDTO invalidPolicy = new ReservationSnapshotDTO(
                 snapshot.resource(),
-                new ReservationSnapshotDTO.PolicyInfo(0, 30, 30, 480, false, 0), 1L);
+                new ReservationSnapshotDTO.PolicyInfo(0, 30, 30, 480, false, 0, ""), 1L);
 
         assertThatThrownBy(() -> validator.validate(
                 new CreateReservationCommand(1L, "", Instant.parse("2026-07-22T08:00:00Z"),
