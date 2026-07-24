@@ -18,13 +18,14 @@ export const useAuthStore = defineStore('auth', () => {
       await fetchUserInfo()
       if (userInfo.value) {
         sessionStorage.setItem('userId', String(userInfo.value.id))
-        sessionStorage.setItem('userRoles', userInfo.value.roles.join(','))
+        const res2 = await get<{ roleIds: number[] }>('/auth/me')
+        sessionStorage.setItem('userRoles', (res2.roleIds || []).join(','))
       }
     } catch { /* /me endpoint might not be available yet */ }
   }
 
   async function fetchUserInfo() {
-    const info = await get<{ id: number; username: string; displayName: string; roles: string[]; permissions: string[] }>('/auth/me')
+    const info = await get<{ id: number; username: string; displayName: string; roles: string[]; roleIds: number[]; permissions: string[] }>('/auth/me')
     userInfo.value = { id: info.id, username: info.username, displayName: info.displayName, roles: info.roles }
     permissions.value = info.permissions || []
   }

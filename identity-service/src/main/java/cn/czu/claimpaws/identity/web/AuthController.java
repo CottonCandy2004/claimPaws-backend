@@ -69,16 +69,17 @@ public class AuthController {
                 .map(user -> {
                     List<Role> roles = roleMapper.findByUserId(user.id());
                     List<String> roleNames = roles.stream().map(Role::name).toList();
+                    List<Long> roleIds = roles.stream().map(Role::id).toList();
                     List<String> permissions = roleNames.contains("admin")
                             ? new ArrayList<>(ADMIN_PERMISSIONS)
                             : List.of("reservation:read", "reservation:write");
-                    var body = Map.<String, Object>of(
-                            "id", user.id(),
-                            "username", user.username(),
-                            "displayName", user.displayName() != null ? user.displayName() : user.username(),
-                            "roles", roleNames,
-                            "permissions", permissions
-                    );
+                    var body = new HashMap<String, Object>();
+                    body.put("id", user.id());
+                    body.put("username", user.username());
+                    body.put("displayName", user.displayName() != null ? user.displayName() : user.username());
+                    body.put("roles", roleNames);
+                    body.put("roleIds", roleIds);
+                    body.put("permissions", permissions);
                     return ResponseEntity.ok(ApiResponse.success(body, requestId));
                 })
                 .orElseGet(() -> ResponseEntity.status(401)
