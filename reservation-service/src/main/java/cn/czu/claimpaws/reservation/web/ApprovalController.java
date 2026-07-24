@@ -23,11 +23,29 @@ public class ApprovalController {
     public ApiResponse<PageResponse<ReservationView>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestHeader(value = "X-User-Roles", required = false) String userRoles,
             @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
         int offset = (page - 1) * size;
-        List<Reservation> reservations = reservationMapper.findPendingApprovals(offset, size);
-        long total = reservationMapper.countPendingApprovals();
-        List<ReservationView> views = reservations.stream().map(r -> ReservationView.from(r, 0)).toList();
+        List<Reservation> all = reservationMapper.findPendingApprovals(0, Integer.MAX_VALUE);
+        // Filter: user's roles must contain the next approver role
+        String[] roles = userRoles != null ? userRoles.split(",") : new String[0];
+        List<Reservation> filtered = all.stream()
+                .filter(r -> {
+                    String[] chain = r.approverRoles().split(",");
+                    int level = r.approvedLevels();
+                    if (level >= chain.length || chain[0].isEmpty()) return true; // no roles → anyone can approve
+                    String nextRole = chain[level].trim();
+                    for (String ur : roles) {
+                        if (ur.trim().equals(nextRole)) return true;
+                    }
+                    if ("admin".equals(userRoles)) return true; // admin can always approve
+                    return false;
+                })
+                .toList();
+        int total = filtered.size();
+        int end = Math.min(offset + size, total);
+        List<Reservation> pageList = filtered.subList(Math.min(offset, total), end);
+        List<ReservationView> views = pageList.stream().map(r -> ReservationView.from(r, 0)).toList();
         return ApiResponse.success(new PageResponse<>(views, page, size, total), requestId);
     }
 

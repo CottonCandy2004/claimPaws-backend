@@ -9,6 +9,10 @@ request.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   config.headers['X-Request-Id'] = uuidv4()
   const token = sessionStorage.getItem('accessToken')
   if (token) config.headers.Authorization = `Bearer ${token}`
+  const uid = sessionStorage.getItem('userId')
+  if (uid) config.headers['X-User-Id'] = uid
+  const roles = sessionStorage.getItem('userRoles')
+  if (roles) config.headers['X-User-Roles'] = roles
   if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
     config.headers['Idempotency-Key'] = uuidv4()
   }

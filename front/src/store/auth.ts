@@ -14,7 +14,13 @@ export const useAuthStore = defineStore('auth', () => {
     const res = await post<{ accessToken: string }>('/auth/login', req)
     accessToken.value = res.accessToken
     sessionStorage.setItem('accessToken', res.accessToken)
-    try { await fetchUserInfo() } catch { /* /me endpoint might not be available yet */ }
+    try {
+      await fetchUserInfo()
+      if (userInfo.value) {
+        sessionStorage.setItem('userId', String(userInfo.value.id))
+        sessionStorage.setItem('userRoles', userInfo.value.roles.join(','))
+      }
+    } catch { /* /me endpoint might not be available yet */ }
   }
 
   async function fetchUserInfo() {

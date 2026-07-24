@@ -34,11 +34,12 @@ public class ReservationController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String keyword,
-            @RequestHeader(value = "X-User-Id", defaultValue = "1") long userId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestHeader(value = "X-Request-Id", required = false) String requestId) {
         int offset = (page - 1) * size;
-        List<Reservation> reservations = reservationMapper.findPage(offset, size, userId, status, keyword);
-        long total = reservationMapper.countFiltered(userId, status, keyword);
+        long uid = userId != null ? userId : 1L;
+        List<Reservation> reservations = reservationMapper.findPage(offset, size, uid, status, keyword);
+        long total = reservationMapper.countFiltered(uid, status, keyword);
         List<ReservationView> views = reservations.stream().map(r -> ReservationView.from(r, 0)).toList();
         return ApiResponse.success(new PageResponse<>(views, page, size, total), requestId);
     }
