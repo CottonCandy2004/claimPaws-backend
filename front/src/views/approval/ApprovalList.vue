@@ -7,8 +7,8 @@
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="username" label="申请人" />
         <el-table-column prop="resourceName" label="资源" />
-        <el-table-column prop="startTime" label="开始时间" width="170" />
-        <el-table-column prop="endTime" label="结束时间" width="170" />
+        <el-table-column prop="startAt" label="开始时间" width="170" />
+        <el-table-column prop="endAt" label="结束时间" width="170" />
         <el-table-column label="状态" width="100"><template #default="{ row }"><StatusTag :status="row.status" /></template></el-table-column>
         <el-table-column label="操作" width="200">
           <template #default="{ row }">
